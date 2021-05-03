@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:og="http://ogp.me/ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:schema="http://schema.org/" xmlns:sioc="http://rdfs.org/sioc/ns#" xmlns:sioct="http://rdfs.org/sioc/types#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#" version="2.0" xml:base="https://www.ecdc.europa.eu/en">
+  <channel>
+    <title>ECDC - RSS - COVID-19</title>
+    <link>https://www.ecdc.europa.eu/en</link>
+    <description/>
+    <language>en</language>
+    
+    <item>
+  <title>Communicable disease threats report, 25 April - 1 May 2021, week 17</title>
+  <link>https://www.ecdc.europa.eu/en/publications-data/communicable-disease-threats-report-25-april-1-may-2021-week-17</link>
+  <description>This issue of the ECDC Communicable Disease Threats Report (CDTR) covers the period 25 April - 1 May 2021 and includes updates on Crimean-Congo haemorrhagic fever, COVID-19, Ebola virus disease and dengue.</description>
+  <pubDate>Fri, 30 Apr 2021 14:00:00 +0200</pubDate>
+    <dc:creator>ECDC</dc:creator>
+    <guid isPermaLink="true">https://www.ecdc.europa.eu/en/publications-data/communicable-disease-threats-report-25-april-1-may-2021-week-17</guid>
+    </item>
+<item>
+  <title>Archive of data for the maps in support of the Council Recommendation on a coordinated approach to travel measures in the EU</title>
+  <link>https://www.ecdc.europa.eu/en/publications-data/archive-data-maps-support-council-recommendation-coordinated-approach-travel</link>
+  <description>Archived data for the maps in support of the Council Recommendation on a coordinated approach to travel measures in the EU</description>
+  <pubDate>Fri, 30 Apr 2021 14:00:00 +0200</pubDate>
+    <dc:creator>ECDC</dc:creator>
+    <guid isPermaLink="true">https://www.ecdc.europa.eu/en/publications-data/archive-data-maps-support-council-recommendation-coordinated-approach-travel</guid>
+    </item>
+<item>
+  <title>Data on the daily number of new reported COVID-19 cases and deaths by EU/EEA country</title>
+  <link>https://www.ecdc.europa.eu/en/publications-data/data-daily-new-cases-covid-19-eueea-country</link>
+  <description>The downloadable data file is updated daily and contains the latest available public data on COVID-19. Each row/entry contains the number of new cases and deaths reported per day and per country in the EU/EEA. </description>
+  <pubDate>Fri, 30 Apr 2021 14:00:00 +0200</pubDate>
+    <dc:creator>ECDC</dc:creator>
+    <guid isPermaLink="true">https://www.ecdc.europa.eu/en/publications-data/data-daily-new-cases-covid-19-eueea-country</guid>
+    </item>
+<item>
+  <title>Infographic: COVID-19 vaccination in the EU/EEA</title>
+  <link>https://www.ecdc.europa.eu/en/publications-data/infographic-covid-19-vaccination-eueea</link>
+  <description>This infographic shows how many from the various priority groups have been vaccinated as of 25 April 2021.</description>
+  <pubDate>Thu, 29 Apr 2021 14:00:00 +0200</pubDate>
+    <dc:creator>ECDC</dc:creator>
+    <guid isPermaLink="true">https://www.ecdc.europa.eu/en/publications-data/infographic-covid-19-vaccination-eueea</guid>
+    </item>
+<item>
+  <title>Data on SARS-CoV-2 variants in the EU/EEA</title>
+  <link>https://www.ecdc.europa.eu/en/publications-data/data-virus-variants-covid-19-eueea</link>
+  <description>The downloadable data file contains information about the volume of COVID-19 sequencing, the number and percentage distribution of variants of concern (VOC) by week and country.</description>
+  <pubDate>Thu, 29 Apr 2021 14:00:00 +0200</pubDate>
+    <dc:creator>ECDC</dc:creator>
+    <guid isPermaLink="true">https://www.ecdc.europa.eu/en/publications-data/data-virus-variants-covid-19-eueea</guid>
+    </item>
+<item>
+  <title>Data for the maps in support of the Council Recommendation on a coordinated approach to the restriction of free movement in response to the COVID-19 pandemic in the EU/EEA</title>
+  <link>https://www.ecdc.europa.eu/en/publications-data/indicators-maps-support-council-recommendation</link>
+  <description>The downloadable data file contains the data on which the maps requested in the Council Recommendation on a coordinated approach to the restriction of free movement in response to the COVID-19 pandemic in EU/EEA are based. They are published every Thursday.</description>
+  <pubDate>Thu, 29 Apr 2021 14:00:00 +0200</pubDate>
+    <dc:creator>ECDC</dc:creator>
+    <guid isPermaLink="true">https://www.ecdc.europa.eu/en/publications-data/indicators-maps-support-council-recommendation</guid>
+    </item>
+<item>
+  <title>Data on the weekly subnational 14-day notification rate of new COVID-19 cases</title>
+  <link>https://www.ecdc.europa.eu/en/publications-data/weekly-subnational-14-day-notification-rate-covid-19</link>
+  <description>The downloadable data file contains information on the 14-day notification rate of new cases per 100 000 inhabitants for COVID-19 by day and subnational region. Each row contains the corresponding data for a certain epidemiological week and per subnational region. The file is updated weekly. You may use the data in line with ECDC’s copyright policy.</description>
+  <pubDate>Thu, 29 Apr 2021 14:00:00 +0200</pubDate>
+    <dc:creator>ECDC</dc:creator>
+    <guid isPermaLink="true">https://www.ecdc.europa.eu/en/publications-data/weekly-subnational-14-day-notification-rate-covid-19</guid>
+    </item>
+<item>
+  <title>Data on the daily subnational 14-day notification rate of new COVID-19 cases</title>
+  <link>https://www.ecdc.europa.eu/en/publications-data/subnational-14-day-notification-rate-covid-19</link>
+  <description>The downloadable data file contains information on the 14-day notification rate of new cases per 100 000 inhabitants for COVID-19 by day and subnational region. Each row contains the corresponding data for a certain day and per subnational region. The file is updated weekly. You may use the data in line with ECDC’s copyright policy.&lt;br /&gt;&lt;br /&gt;
+The source is either TESSy COVID-19, subnational daily data, or an official Github source, or an official website.</description>
+  <pubDate>Thu, 29 Apr 2021 14:00:00 +0200</pubDate>
+    <dc:creator>ECDC</dc:creator>
+    <guid isPermaLink="true">https://www.ecdc.europa.eu/en/publications-data/subnational-14-day-notification-rate-covid-19</guid>
+    </item>
+<item>
+  <title>Data on 14-day notification rate of new COVID-19 cases and deaths</title>
+  <link>https://www.ecdc.europa.eu/en/publications-data/data-national-14-day-notification-rate-covid-19</link>
+  <description>These files contain data on the 14-day notification rate of newly reported COVID-19 cases per 100 000 population and 14-day notification rate of reported deaths per million population by week and country, in EU/EEA and the UK. Each row contains the corresponding data for a given indicator, week and country. The files are updated weekly. You may use the data in accordance to ECDC’s copyright policy.&lt;br /&gt;</description>
+  <pubDate>Thu, 29 Apr 2021 14:00:00 +0200</pubDate>
+    <dc:creator>ECDC</dc:creator>
+    <guid isPermaLink="true">https://www.ecdc.europa.eu/en/publications-data/data-national-14-day-notification-rate-covid-19</guid>
+    </item>
+<item>
+  <title>Data on hospital and ICU admission rates and current occupancy for COVID-19 </title>
+  <link>https://www.ecdc.europa.eu/en/publications-data/download-data-hospital-and-icu-admission-rates-and-current-occupancy-covid-19</link>
+  <description>The downloadable data files contain information about hospitalisation and Intensive Care Unit (ICU) admission rates and current occupancy for COVID-19 by date and country. Each row contains the corresponding data for a certain date (day or week) and per country. The file is updated weekly. You may use the data in line with ECDC’s copyright policy.</description>
+  <pubDate>Thu, 29 Apr 2021 14:00:00 +0200</pubDate>
+    <dc:creator>ECDC</dc:creator>
+    <guid isPermaLink="true">https://www.ecdc.europa.eu/en/publications-data/download-data-hospital-and-icu-admission-rates-and-current-occupancy-covid-19</guid>
+    </item>
+
+  </channel>
+</rss>

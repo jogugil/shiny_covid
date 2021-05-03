@@ -1,0 +1,20 @@
+{
+  "languages": ["es", "en"],
+  "translation": [
+      {"es": "Seguimiento COVID19", "en": "COVID 19 tracking"},
+      {"es": "Global", "en": "Global Information"},
+      {"es": "España -por Couminidades", "en": "Spanish Data"},
+      {"es": "Comunidad Valenciana", "en": "CV Data"},
+      {"es": "Recomendaciones de la OMS", "en": "Recommendations"},
+      {"es": "    Actualización de datos", "en": "Data Update"}, 
+      {
+        "es": "Información y ayuda de la APP",
+        "en": "Info-Help"
+      },
+    {
+      "es": "Sobre nosotros",
+      "en": "about"
+    } 
+       
+    ]
+}

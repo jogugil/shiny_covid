@@ -1,0 +1,54 @@
+#metaModel {
+    height: 100% !important;
+    width: 80% !important;
+    margin: auto !important;
+}
+
+.main-header .navbar{
+	background-color: #D0EFB1 !important;
+}
+
+.main-header>.logo {
+	background-color: #B3D89C !important;
+	font-family: "Georgia", Times, "Times New Roman", serif;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+#uulogo {
+	display: table;
+	margin: 0 auto;
+	padding-top: 20px;
+}
+
+#uulogo img{
+ 	width: 150px;
+}
+
+.content-wrapper, .right-side {
+	overflow-y: auto;
+	max-height: 600px;
+}
+
+.box {
+	border-top-color: #9DC3C2 !important;
+}
+
+.mainBox .box,
+.nav-tabs-custom>.nav-tabs>li.active {
+	border-top-color: #ffd400 !important;
+}
+.shiny-input-container {
+  color: #474747;
+}
+.box.box-solid.box-primary>.box-header {
+  color:#fff;
+  background:#666666
+                    }
+
+.box.box-solid.box-primary{
+border-bottom-color:#666666;
+border-left-color:#666666;
+border-right-color:#666666;
+border-top-color:#666666;
+}
