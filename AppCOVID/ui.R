@@ -57,7 +57,7 @@ sidebar <- dashboardSidebar(
             tabName = "DataUpdate", 
             icon = icon("refresh"),
             selected=FALSE, 
-            menuSubItem( "Global",  tabName ="globalDataUpdate",  actionButton('goPlot', 'Go plot')),
+            menuSubItem( "Global",actionButton('globalDataUpdate', 'Update Global Data')),
             menuSubItem( "España -por Couminidades", tabName ="spanhisDataUpdate" ),
             menuSubItem( "Comunidad Valenciana", tabName ="ValenciaDataUpdate" ),
             menuSubItem( "Recomendaciones de la OMS", tabName ="recomendacionesOMSUpdate" )
