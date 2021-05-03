@@ -15,6 +15,7 @@ shinyServer(function(input, output) {
   ###################################
   ### Descarga y actualización de datos
   ##################################
+  # the progress API.
   output$plot <- renderPlot({
     input$goPlot # Re-run when button is clicked
     
@@ -40,8 +41,29 @@ shinyServer(function(input, output) {
           # Pause for 0.1 seconds to simulate a long computation.
           Sys.sleep(0.1)
         }
-      })))
+      })
+      
+      # Increment the top-level progress indicator
+      incProgress(0.5)
+      
+      # Another nested progress indicator.
+      # When value=NULL, progress text is displayed, but not a progress bar.
+      withProgress(message = 'And this also', detail = "This other thing",
+                   style = style, value = NULL, {
+                     
+                     Sys.sleep(0.75)
+                   })
+      
+      # We could also increment the progress indicator like so:
+      # incProgress(0.5)
+      # but it's also possible to set the progress bar value directly to a
+      # specific value:
+      setProgress(1)
+    })
     
+    plot(cars$speed, cars$dist)
+  })
+  
     
      
 })
