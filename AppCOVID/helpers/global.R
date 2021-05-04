@@ -146,8 +146,8 @@ donwload_scrapingWorldometers <- function (input, output,session) {
   url <- "https://www.worldometers.info/coronavirus/"
   
   # Create a Progress object
-  style <- isolate(input$style)
-  progress <- shiny::Progress$new(style = style)
+  style     <- isolate(input$style)
+  progress  <- shiny::Progress$new(style = style)
   progress$set(message = "Extrayendo datos de Worldometers", value = 0)
   # Close the progress when this reactive exits (even if there's an error)
   on.exit(progress$close())
@@ -165,8 +165,7 @@ donwload_scrapingWorldometers <- function (input, output,session) {
       # Increment the progress bar, and update the detail text.
       incProgress(0.1, detail = paste("part", STANDBY_TIME))
       
-      # There are some "+" symbols and the "," 
-      # for the thousand separators that we wan to remove them
+      # Recopil la tabla que muestra en tiempo real los datos de COVID al recdedor del mundo 
       my_table[]<-lapply(my_table, function(x) (gsub("\\,|\\+", "", (x))))
       
       # Increment the progress bar, and update the detail text.
@@ -234,3 +233,7 @@ donwload_scrapingWorldometers <- function (input, output,session) {
 # url_en_recomendationsOMS ='https://www.who.int/emergencies/diseases/novel-coronavirus-2019/advice-for-public'
 
 #
+donwload_scrapingOMS <- function (input, output,session) {
+  url_recomendationsOMS ='https://www.who.int/es/emergencies/diseases/novel-coronavirus-2019/advice-for-public'
+  html <-  url_recomendationsOMS  %>% read_html() %>% html_nodes(".row")
+}
