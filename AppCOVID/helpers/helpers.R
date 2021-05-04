@@ -19,7 +19,7 @@ standby_donwload <- function(ini,total = 60) {
       return(1) 
     else
         return(0)
- 
+  
 }
 progress_widget <- function (){
 # Create a Progress object
@@ -41,4 +41,13 @@ updateProgress <- function(value = NULL, detail = NULL,progress=NULL) {
     value <- value + (progress$getMax() - value) / 5
   }
   progress$set(value = value, detail = detail)
+}
+#  
+#  
+createFilename <- function(path = '.7', name = 'file',ext= 'csv') {
+  date <- Sys.Date()
+  filename  <- paste (name,date,sep="_")
+  filename  <- paste (filename ,ext,sep=".")
+  filename  <- paste (path,filename  ,sep="/")
+  filename
 }

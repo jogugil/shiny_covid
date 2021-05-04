@@ -8,7 +8,7 @@ La aplicación se desarrolla como un proyecto de la asignatura de Visualización
 <ol>
 <li> Los datos sobre el estado de la pandemia en todo el mundo se recopilan en el sitio web de la OMS y de la comunidad europea:
 <ul> <li type="circle"> Datos de la OMS:Tanto de sus <a href="https://covid19.who.int/">páginas web</a> como del <a href="https://covid19.who.int/WHO-COVID-19-global-table-data.csv"> fichero csv </a>que mantienen actualizado en abierto para descarga </li></ul>	
-<ul> <li type="circle"> Datos de la Comunidad Europea: Fichero zip que contiene varios ficheros csv con los datos historiscos por mes y acumulados en 14 días cada mil habitantes para cada uno de los países con incidencia de la pandemia.  </li></ul>	
+<ul> <li type="circle"> Datos de  worldometers :    En su <a href='https://www.worldometers.info/coronavirus/'>web</a> nos presenta datos en tiempo real por país de la situación actual de pandemia. Nos complementa los datos de incidencia acumulados que nos da la OMS. </li></ul>	
 
 </li>
 <li>

@@ -3,13 +3,19 @@ library(shinyWidgets)
 library(ggplot2)
 library(shiny)
 library(shinydashboard)
+library(tidyverse)
+library(rvest)
 source("./helpers/helpers.R")
 
 PATH_DATA     <-"./data"
 STANDBY_TIME  <- 15
-PKI_OMS       <- c("Name","Region","casesCumulative","cumulative100000p","reported7d","reported7d100000p",
+PKI_OMS         <- c("Name","Region","casesCumulative","cumulative100000p","reported7d","reported7d100000p",
                        "reported24h","deathsCumulative","deathsCumulative100000p","deathsreported7d",
                        "deathsreported7d100000p","deathsreported24h","transmisionType")
+PKI_WD          <- c('Id','World-country-continental','TotalCases','NewCases','TotalDeaths','NewDeaths','TotalRecovered',
+                    'NewRecovered','ActiveCases','CritcalCase','TotalCase1M','DeathsCase1M','TotalTests','test1Mpop',
+                    'Population','Continent','Caseevery','Deathevery','Testevery','newCase1M','deathsCase1M','ActiveCas1M')
+ 
 
 #####################################################################
 #Descargamos los datos y grabamos en el directorio de datos de la APP
@@ -45,7 +51,7 @@ download_filesCSVOMS <- function (input, output,session) {
     
     # Create a Progress object
     progress <- shiny::Progress$new(style = style)
-    progress$set(message = "Computing data", value = 0)
+    progress$set(message = "Download OMS data", value = 0)
     # Close the progress when this reactive exits (even if there's an error)
     on.exit(progress$close())
   
@@ -55,10 +61,8 @@ download_filesCSVOMS <- function (input, output,session) {
       text <- paste0("t0:",t0, " t1:", round(STANDBY_TIME))
       updateProgress(detail = text,progress=progress)
     }
-    date <- Sys.Date()
-    filename <- paste ("globalDataOMS",date,sep="_")
-    filename <- paste (filename,"csv",sep=".")
-    filename <- paste (PATH_DATA,filename,sep="/")
+ 
+    filename <- createFilename (path=PATH_DATA,name="globalDataOMS")
     
     if (is.function(updateProgress)) {
       text <- paste0("t0:",difftime(Sys.time(), t0, u = 'secs'), " t1:", round(STANDBY_TIME))
@@ -68,14 +72,14 @@ download_filesCSVOMS <- function (input, output,session) {
     ini <- Sys.time ()
     data_file <- NULL
     withProgress(message = 'Generating data', style = style, detail = "part 0", value = 0, {
-        print(standby_donwload (ini,STANDBY_TIME))
+         
         while (is.null (data_file) && 
                 standby_donwload (ini,STANDBY_TIME)!=1) {
             data_file <- read.csv(url_CSVOMS)
+            
             # Increment the progress bar, and update the detail text.
             incProgress(0.1, detail = paste("part", STANDBY_TIME))
-            if(!is.null(data_file))
-                print(head(data_file))
+            
             # Pause for 0.1 seconds to simulate a long computation.
             Sys.sleep(0.1)
         }
@@ -111,4 +115,126 @@ download_filesCSVOMS <- function (input, output,session) {
       })
     return (res)
 }
+##############################################################################################
+## Web Scraping web www.worldometers.info - Recomendaciones######
+### https://www.worldometers.info/coronavirus/
+### Los datos recopilados de esta web son:
+#"Country,Other"    (country,world,continental)   
+#"TotalCases"       (TotalCases)  
+#"NewCases"         (NewCases)             
+#"TotalDeaths"      (TotalDeaths)         
+#"NewDeaths"        (NewDeaths)          
+#"TotalRecovered"   (TotalRecovered)      
+#"NewRecovered"     (NewRecovered)        
+#"ActiveCases"      (ActiveCases)         
+#"Serious,Critical" (CritcalCase)   
+#"Tot Cases/1M pop" (TotalCase1M)   
+#"Deaths/1M pop"    (DeathsCase1M)  
+#"TotalTests"       (TotalTests)          
+#"Tests/1M pop"     (test1Mpop)        
+#"Population"       (Population)          
+#"Continent"         (Continent)  
+#"1 Caseevery X ppl"  (Caseevery) 
+#"1 Deathevery X ppl" (Deathevery)
+#"1 Testevery X ppl"  (Testevery) 
+#"New Cases/1M pop"   (newCase1M)    
+#"New Deaths/1M pop"  (deathsCase1M) 
+#"Active Cases/1M pop" (ActiveCas1M)
+##############################################################################################
+donwload_scrapingWorldometers <- function () {
+  url <- "https://www.worldometers.info/coronavirus/"
+  
+  # Create a Progress object
+  progress <- shiny::Progress$new(style = style)
+  progress$set(message = "Extrayendo datos de Worldometers", value = 0)
+  # Close the progress when this reactive exits (even if there's an error)
+  on.exit(progress$close())
+  
+  Sys.sleep(0.25)
+  t0 <- Sys.time ()
+  if (is.function(updateProgress)) {
+    text <- paste0("t0:",t0, " t1:", round(STANDBY_TIME))
+    updateProgress(detail = text,progress=progress)
+  }
+  withProgress(message = 'Generating data', style = style, detail = "part 0", value = 0, {
+    
+    my_table<- url %>% read_html() %>% html_table() %>%.[[1]]
+    if (!is.null(my_table) && length(my_table)!=0)  {
+      # Increment the progress bar, and update the detail text.
+      incProgress(0.1, detail = paste("part", STANDBY_TIME))
+      
+      # There are some "+" symbols and the "," 
+      # for the thousand separators that we wan to remove them
+      my_table[]<-lapply(my_table, function(x) (gsub("\\,|\\+", "", (x))))
+      
+      # Increment the progress bar, and update the detail text.
+      incProgress(0.1, detail = paste("part", STANDBY_TIME))
+      
+      Sys.sleep(0.25)
+      t0 <- Sys.time ()
+      if (is.function(updateProgress)) {
+        text <- paste0("t0:",t0, " t1:", round(STANDBY_TIME))
+        updateProgress(detail = text,progress=progress)
+      }
+      
+      
+      names(my_table) <- PKI_WD
+      # convert all but the first and last column to numeric
+      continent <-  my_table[1:6,]
+      names(continent)[2] <- 'continent'
+      world     <-  my_table[8,]
+      names(world)[2] <- 'world'
+      contry    <-  my_table[9:230,]  
+      names(contry)[2] <- 'contry'
+      
+      incProgress(0.5)
+      if (is.function(updateProgress)) {
+        text <- paste0("t0:",t0, " t1:", round(STANDBY_TIME))
+        updateProgress(detail = text,progress=progress)
+      }
+      
+      df        <- list(world=world,continent=continent,contry=contry)
+      setProgress(1)
+      
+      withProgress(message = 'Grabando datos en local', detail = "Guardando datos internacionales de worldometers",
+                   style = style, value = NULL, {
+                     Sys.sleep(0.75)
+ 
+                     write.csv(continent,createFilename (path=PATH_DATA,name="worldometersContinent"))
+                     write.csv(world,createFilename (path=PATH_DATA,name="worldometersWorld"))
+                     write.csv(contry,createFilename (path=PATH_DATA,name="worldometersCountry"))
+                     if(file.exists(filename))
+                       res <- "Los datos han sido actualizados desde la web de la OMS!!!"
+                     else
+                       res <- "Los datos no han sido actualizados desde la web de la OMS!!!. 
+                                Error al guardar los datos en local. Contacte con el administrador."
+                   })
+    } else 
+      res <- "Los datos no han sido recopilados del sitio web worldometers. Contacte con el administrador."
+    setProgress(1)
+    
+  })
+  res
+}
 
+wdometersWorld <- c('World','TotalCases','NewCases','TotalDeaths','NewDeaths','TotalRecovered',
+  'NewRecovered','ActiveCases','CritcalCase','TotalCase1M','DeathsCase1M','TotalTests','test1Mpop',
+  'Population','Continent','Caseevery','Deathevery','Testevery','newCase1M','deathsCase1M','ActiveCas1M')
+wdometerscountry <- c('Country','TotalCases','NewCases','TotalDeaths','NewDeaths','TotalRecovered',
+                    'NewRecovered','ActiveCases','CritcalCase','TotalCase1M','DeathsCase1M','TotalTests','test1Mpop',
+                    'Population','Continent','Caseevery','Deathevery','Testevery','newCase1M','deathsCase1M','ActiveCas1M')
+wdometerscotinent <- c('Continental','TotalCases','NewCases','TotalDeaths','NewDeaths','TotalRecovered',
+                      'NewRecovered','ActiveCases','CritcalCase','TotalCase1M','DeathsCase1M','TotalTests','test1Mpop',
+                      'Population','Continent','Caseevery','Deathevery','Testevery','newCase1M','deathsCase1M','ActiveCas1M')
+###############################################
+## Web Scraping web OMS - Recomendaciones######
+###
+# Recuperamos las recomendaciones que indica la OMS en su página web.
+# En un principio usaremos sólo el lenguaje español, con lo que 
+# la url donde se encuentra la información es:
+# url_recomendationsOMS ='https://www.who.int/es/emergencies/diseases/novel-coronavirus-2019/advice-for-public'
+# 
+# Si utilizamos también el ingles, la información se recupera en ;
+# url_en_recomendationsOMS ='https://www.who.int/emergencies/diseases/novel-coronavirus-2019/advice-for-public'
+
+#
