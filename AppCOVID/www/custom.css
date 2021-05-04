@@ -52,3 +52,33 @@ border-left-color:#666666;
 border-right-color:#666666;
 border-top-color:#666666;
 }
+.my_table_aa01 .table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+                                                border-collapse: collapse;
+                                                }
+
+                                                .my_table_aa01 th {
+                                                 border: 1px solid black !important;
+                                                 text-align: center !important;
+                                                 vertical-align: middle !important;
+                                                 color: white !important;
+                                                 background-color: #615858 !important;
+                                                 white-space: nowrap;
+                                                 border-bottom: none}
+
+                                                .my_table_aa01 td {padding: 1rem;
+                                                border: 1px solid black;}
+
+                                                .my_table_aa01 tr:first-child {
+                                                  border : 1px solid black;
+                                                 border-top: 1px solid black;}
+
+                                                 .my_table_aa01 tr:nth-child(even){
+                                                 background-color: #afd19d;
+                                                 color: black;
+                                                 font-size:16px;}
+
+                                                 .my_table_aa01 tr:nth-child(odd){
+                                                 background-color: white;
+                                                 color: black;
+                                                 font-size:16px;
+                                                 }

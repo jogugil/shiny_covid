@@ -68,12 +68,12 @@ shinyServer(function(input, output,session) {
   ###################################
   ### Descarga y actualización de datos
   ##################################
-  output$TextDataGlobalUpdate <- renderText({ download_filesCSVOMS (input, output,session) })
+  output$TextDataGlobalUpdate <- renderText({ paste (download_filesCSVOMS (input, output,session),donwload_scrapingWorldometers(input, output,session),sep='\n') })
   
   
   # the progress API.
   output$plot <- renderPlot({
-    print(paste0("Entramos en el progreso plot"))
+    if (DEBUG) print(paste0("Entramos en el progreso plot"))
     
     style <- isolate(input$style)
     data(cars)
@@ -121,37 +121,37 @@ shinyServer(function(input, output,session) {
   # This example uses the Progress object API directly. This is useful because
   # calls an external function to do the computation.
   output$table <- DT::renderDataTable({
-    print(paste("Dentro de output"))
+    if (DEBUG) print(paste("Dentro de output"))
     server_table (input, output,session)
   })
   output$table1 <- DT::renderDataTable({
-    print(paste("Dentro de output"))
+    if (DEBUG) print(paste("Dentro de output"))
     server_table (input, output,session)
   })
   output$table2 <- DT::renderDataTable({
-    print(paste("Dentro de output"))
+    if (DEBUG) print(paste("Dentro de output"))
     server_table (input, output,session)
   })
   output$table3 <- DT::renderDataTable({
-    print(paste("Dentro de output"))
+    if (DEBUG) print(paste("Dentro de output"))
     server_table (input, output,session)
   })
   output$table4 <- DT::renderDataTable({
-    print(paste("Dentro de output"))
+    if (DEBUG) print(paste("Dentro de output"))
     server_table (input, output,session)
   })
   output$table5 <- DT::renderDataTable({
-    print(paste("Dentro de output"))
+    if (DEBUG) print(paste("Dentro de output"))
     server_table (input, output,session)
   })
   output$table6 <- DT::renderDataTable({
-    print(paste("Dentro de output"))
+    if (DEBUG) print(paste("Dentro de output"))
     server_table (input, output,session)
   })
   #output es una lista que "anota" qué es lo que tiene que mostrar. En este caso
   # le decimos que tieene que hacer un histograma
   output$HistPlot <- renderPlot({
-    print(paste("Dentro de HistPlot"))
+    if (DEBUG) print(paste("Dentro de HistPlot"))
     # faithful es un dataset que viene precargado en R.
     datos  <- data.frame(faithful$waiting)
     # lo que hace es discretizar a los waiting times entre erupción según la cantidad
@@ -163,7 +163,7 @@ shinyServer(function(input, output,session) {
            x="Tiempo de espera hasta la próxima erupción (minutos)")
   })
   output$HistPlot2 <- renderPlot({
-    print(paste("Dentro de HistPlot"))
+    if (DEBUG) print(paste("Dentro de HistPlot"))
     # faithful es un dataset que viene precargado en R.
     datos  <- data.frame(faithful$waiting)
     # lo que hace es discretizar a los waiting times entre erupción según la cantidad
@@ -175,7 +175,7 @@ shinyServer(function(input, output,session) {
            x="Tiempo de espera hasta la próxima erupción (minutos)")
   })
   output$HistPlot3 <- renderPlot({
-    print(paste("Dentro de HistPlot"))
+    if (DEBUG) print(paste("Dentro de HistPlot"))
     # faithful es un dataset que viene precargado en R.
     datos  <- data.frame(faithful$waiting)
     # lo que hace es discretizar a los waiting times entre erupción según la cantidad
@@ -187,7 +187,7 @@ shinyServer(function(input, output,session) {
            x="Tiempo de espera hasta la próxima erupción (minutos)")
   })
   output$HistPlot4 <- renderPlot({
-    print(paste("Dentro de HistPlot"))
+    if (DEBUG) print(paste("Dentro de HistPlot"))
     # faithful es un dataset que viene precargado en R.
     datos  <- data.frame(faithful$waiting)
     # lo que hace es discretizar a los waiting times entre erupción según la cantidad
@@ -199,7 +199,7 @@ shinyServer(function(input, output,session) {
            x="Tiempo de espera hasta la próxima erupción (minutos)")
   })
   output$DensPlot <- renderPlot({
-    print(paste("Dentro de renderplot0"))
+    if (DEBUG) print(paste("Dentro de renderplot0"))
     # faithful es un dataset que viene precargado en R.
     datos  <- data.frame(faithful$waiting)
     # lo que hace es discretizar a los waiting times entre erupción según la cantidad

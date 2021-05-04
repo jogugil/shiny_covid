@@ -36,6 +36,12 @@ header <- dashboardHeader(
 
 #SIDE BAR
 sidebar <- dashboardSidebar(
+  sidebarUserPanel("Creative Data Science",
+                   subtitle = a(href = "#", icon("circle", class = "text-success"), "Online"),
+                   # Image file should be in www/ subdir
+                   image = "logo_company.png"
+  ), 
+  #sidebarSearchForm(label = "Enter a number", "searchText", "searchButton") ,
   width = 250,
     sidebarMenu(
         id="selectionMenu",

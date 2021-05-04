@@ -7,6 +7,7 @@ library(tidyverse)
 library(rvest)
 source("./helpers/helpers.R")
 
+DEBUG <- TRUE
 PATH_DATA     <-"./data"
 STANDBY_TIME  <- 15
 PKI_OMS         <- c("Name","Region","casesCumulative","cumulative100000p","reported7d","reported7d100000p",
@@ -141,10 +142,11 @@ download_filesCSVOMS <- function (input, output,session) {
 #"New Deaths/1M pop"  (deathsCase1M) 
 #"Active Cases/1M pop" (ActiveCas1M)
 ##############################################################################################
-donwload_scrapingWorldometers <- function () {
+donwload_scrapingWorldometers <- function (input, output,session) {
   url <- "https://www.worldometers.info/coronavirus/"
   
   # Create a Progress object
+  style <- isolate(input$style)
   progress <- shiny::Progress$new(style = style)
   progress$set(message = "Extrayendo datos de Worldometers", value = 0)
   # Close the progress when this reactive exits (even if there's an error)
@@ -199,14 +201,16 @@ donwload_scrapingWorldometers <- function () {
       withProgress(message = 'Grabando datos en local', detail = "Guardando datos internacionales de worldometers",
                    style = style, value = NULL, {
                      Sys.sleep(0.75)
- 
-                     write.csv(continent,createFilename (path=PATH_DATA,name="worldometersContinent"))
-                     write.csv(world,createFilename (path=PATH_DATA,name="worldometersWorld"))
-                     write.csv(contry,createFilename (path=PATH_DATA,name="worldometersCountry"))
-                     if(file.exists(filename))
-                       res <- "Los datos han sido actualizados desde la web de la OMS!!!"
+                     fCont <- createFilename (path=PATH_DATA,name="worldometersContinent")
+                     write.csv(continent,fCont)
+                     fworld <- createFilename (path=PATH_DATA,name="worldometersWorld")
+                     write.csv(world,fworld)
+                     fcountry <- createFilename (path=PATH_DATA,name="worldometersCountry")
+                     write.csv(contry,fcountry)
+                     if(file.exists(fCont) && file.exists(fworld) && file.exists(fcountry))
+                       res <- "Los datos han sido actualizados desde la web de la worldometers!!!"
                      else
-                       res <- "Los datos no han sido actualizados desde la web de la OMS!!!. 
+                       res <- "Los datos no han sido actualizados desde la web de la worldometers!!!. 
                                 Error al guardar los datos en local. Contacte con el administrador."
                    })
     } else 
@@ -217,15 +221,7 @@ donwload_scrapingWorldometers <- function () {
   res
 }
 
-wdometersWorld <- c('World','TotalCases','NewCases','TotalDeaths','NewDeaths','TotalRecovered',
-  'NewRecovered','ActiveCases','CritcalCase','TotalCase1M','DeathsCase1M','TotalTests','test1Mpop',
-  'Population','Continent','Caseevery','Deathevery','Testevery','newCase1M','deathsCase1M','ActiveCas1M')
-wdometerscountry <- c('Country','TotalCases','NewCases','TotalDeaths','NewDeaths','TotalRecovered',
-                    'NewRecovered','ActiveCases','CritcalCase','TotalCase1M','DeathsCase1M','TotalTests','test1Mpop',
-                    'Population','Continent','Caseevery','Deathevery','Testevery','newCase1M','deathsCase1M','ActiveCas1M')
-wdometerscotinent <- c('Continental','TotalCases','NewCases','TotalDeaths','NewDeaths','TotalRecovered',
-                      'NewRecovered','ActiveCases','CritcalCase','TotalCase1M','DeathsCase1M','TotalTests','test1Mpop',
-                      'Population','Continent','Caseevery','Deathevery','Testevery','newCase1M','deathsCase1M','ActiveCas1M')
+ 
 ###############################################
 ## Web Scraping web OMS - Recomendaciones######
 ###

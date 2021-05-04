@@ -14,7 +14,7 @@
 standby_donwload <- function(ini,total = 60) {
   
     seconds <- round(as.double( difftime(Sys.time(), ini, u = 'secs')))
-    print(seconds)
+    if (DEBUG) print(seconds)
     if(seconds > total)
       return(1) 
     else
@@ -35,7 +35,7 @@ on.exit(progress$close())
 #   distance. If non-NULL, it will set the progress to that value.
 # - It also accepts optional detail text.
 updateProgress <- function(value = NULL, detail = NULL,progress=NULL) {
-  print(progress$getValue())
+  if (DEBUG) print(progress$getValue())
   if (is.null(value)) {
     value <- progress$getValue()
     value <- value + (progress$getMax() - value) / 5
@@ -44,7 +44,7 @@ updateProgress <- function(value = NULL, detail = NULL,progress=NULL) {
 }
 #  
 #  
-createFilename <- function(path = '.7', name = 'file',ext= 'csv') {
+createFilename <- function (path = '.7', name = 'file',ext= 'csv') {
   date <- Sys.Date()
   filename  <- paste (name,date,sep="_")
   filename  <- paste (filename ,ext,sep=".")
