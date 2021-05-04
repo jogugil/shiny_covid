@@ -16,11 +16,12 @@ tabItem(
                  fileInput('datafile2', 'Choose Second CSV file', accept=c('text/csv', 'text/comma-separated-values, text/plain')),
                  tags$hr(),
                  box(
-                   title = "Histogram", status = "primary", solidHeader = TRUE,
+                   title = "Histogram3", status = "primary", solidHeader = TRUE,
                    collapsible = TRUE,
                    
                  ),
-             ) 
+             ) ,box(
+               dataTableOutput('table5')),
       )
    
 )

@@ -57,10 +57,10 @@ sidebar <- dashboardSidebar(
             tabName = "DataUpdate", 
             icon = icon("refresh"),
             selected=FALSE, 
-            menuSubItem( "Global",actionButton('globalDataUpdate', 'Update Global Data')),
-            menuSubItem( "España -por Couminidades", tabName ="spanhisDataUpdate" ),
-            menuSubItem( "Comunidad Valenciana", tabName ="ValenciaDataUpdate" ),
-            menuSubItem( "Recomendaciones de la OMS", tabName ="recomendacionesOMSUpdate" )
+            menuSubItem( "Global",selected=FALSE,tabName ="globalDataUpdate"  ),
+            menuSubItem( "España -por Couminidades", selected=FALSE,tabName ="spanhisDataUpdate" ),
+            menuSubItem( "Comunidad Valenciana", selected=FALSE,tabName ="ValenciaDataUpdate" ),
+            menuSubItem( "Recomendaciones de la OMS", selected=FALSE,tabName ="recomendacionesOMSUpdate" )
           ),
         menuItem(
             "Información y ayuda de la APP", 
@@ -76,7 +76,7 @@ sidebar <- dashboardSidebar(
 )
 
 body <- dashboardBody(
-  width = 1024,
+ 
     tags$head(
         tags$link(rel = "stylesheet", type = "text/css", href = "custom.css"),
         tags$head(tags$script(type="text/javascript", src="custom.js"))
@@ -126,6 +126,66 @@ body <- dashboardBody(
           source("./pages/covidRec.R"), 
           
         ),
+        
+          tabItem(
+             
+            tabName = "globalDataUpdate",
+            
+            p("Actualizando los datos Globales!!!!!") ,
+            verbatimTextOutput("TextDataGlobalUpdate")
+               
+             
+          ),
+          tabItem(
+           
+            tabName = "spanhisDataUpdate",
+            p("Actualización de datos a novel nacional") ,
+            DT::dataTableOutput('table1'),
+                
+                p("Actualización de datos a novel nacional") 
+              
+             
+            
+          ), tabItem(
+           
+            tabName = "ValenciaDataUpdate",
+            fluidRow(
+              box(
+                  dataTableOutput('table2')),
+                 box(plotOutput('plot', width = "300px", height = "300px")),
+                p("Actualización de datos Comunidad Valenciana") 
+            )
+             
+            
+          ), 
+          tabItem(tabName = "recomendacionesOMSUpdate",
+                  fluidRow(
+                  
+                    tabBox(
+                      title = "First tabBox",
+                      # The id lets us use input$tabset1 on the server to find the current tab
+                      id = "tabset1", height = "250px",
+                      tabPanel("Tab1", "First tab content"),
+                      tabPanel("Tab2", "Tab content 2"),
+                      box(plotOutput("HistPlot"), width=6),
+                      box(sliderInput(inputId = "bins",
+                                      label = "Number of bins:",
+                                      min = 1,
+                                      max = 50,
+                                      value = 30),width = 4)
+                    )),
+                  fluidRow(tabBox(
+                      side = "right", height = "250px",
+                      selected = "Tab3",
+                      tabPanel("Tab1", "Tab content 1"),
+                      tabPanel("Tab2", "Tab content 2"),
+                      tabPanel("Tab3", "Note that when side=right, the tab order is reversed."),
+                      dataTableOutput('table3') 
+                    )
+                  ),
+                 
+        ),
+     
         #GUIDELINE
         tabItem(
             tabName = "guideline",
@@ -140,7 +200,6 @@ body <- dashboardBody(
           source("./pages/about.R"),
           
         )
-
     )
 )
 

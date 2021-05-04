@@ -8,7 +8,11 @@
 #
 
 library(shiny)
-library(shiny.i18n)
+library(shinyWidgets)
+library(ggplot2)
+library(shiny)
+library(shinydashboard)
+ 
 # Define server logic required to draw a histogram
 
 compute_data <- function(updateProgress = NULL) {
@@ -33,18 +37,46 @@ compute_data <- function(updateProgress = NULL) {
   
   dat
 }
-shinyServer(function(input, output) {
+server_table <- function (input,output,session) {
+  style <- isolate(input$style)
+  
+  # Create a Progress object
+  progress <- shiny::Progress$new(style = style)
+  progress$set(message = "Computing data", value = 0)
+  # Close the progress when this reactive exits (even if there's an error)
+  on.exit(progress$close())
+  
+  # Create a closure to update progress.
+  # Each time this is called:
+  # - If `value` is NULL, it will move the progress bar 1/5 of the remaining
+  #   distance. If non-NULL, it will set the progress to that value.
+  # - It also accepts optional detail text.
+  updateProgress <- function(value = NULL, detail = NULL) {
+    if (is.null(value)) {
+      value <- progress$getValue()
+      value <- value + (progress$getMax() - value) / 5
+    }
+    progress$set(value = value, detail = detail)
+  }
+  
+  # Compute the new data, and pass in the updateProgress function so
+  # that it can update the progress indicator.
+  compute_data(updateProgress)
+}
+shinyServer(function(input, output,session) {
 
   ###################################
   ### Descarga y actualización de datos
   ##################################
+  output$TextDataGlobalUpdate <- renderText({ download_filesCSVOMS (input, output,session) })
+  
+  
   # the progress API.
   output$plot <- renderPlot({
-    print(paste0("Entramos en el progreso"))
-    input$goPlot # Re-run when button is clicked
+    print(paste0("Entramos en el progreso plot"))
     
     style <- isolate(input$style)
-    
+    data(cars)
     withProgress(message = 'Creating plot', style = style, value = 0.1, {
       Sys.sleep(0.25)
       
@@ -74,8 +106,7 @@ shinyServer(function(input, output) {
       # When value=NULL, progress text is displayed, but not a progress bar.
       withProgress(message = 'And this also', detail = "This other thing",
                    style = style, value = NULL, {
-                     
-                     Sys.sleep(0.75)
+                   Sys.sleep(0.75)
                    })
       
       # We could also increment the progress indicator like so:
@@ -84,39 +115,100 @@ shinyServer(function(input, output) {
       # specific value:
       setProgress(1)
     })
-    
+     
     plot(cars$speed, cars$dist)
   })
   # This example uses the Progress object API directly. This is useful because
   # calls an external function to do the computation.
-  output$table <- renderTable({
-    input$goTable
-    
-    style <- isolate(input$style)
-    
-    # Create a Progress object
-    progress <- shiny::Progress$new(style = style)
-    progress$set(message = "Computing data", value = 0)
-    # Close the progress when this reactive exits (even if there's an error)
-    on.exit(progress$close())
-    
-    # Create a closure to update progress.
-    # Each time this is called:
-    # - If `value` is NULL, it will move the progress bar 1/5 of the remaining
-    #   distance. If non-NULL, it will set the progress to that value.
-    # - It also accepts optional detail text.
-    updateProgress <- function(value = NULL, detail = NULL) {
-      if (is.null(value)) {
-        value <- progress$getValue()
-        value <- value + (progress$getMax() - value) / 5
-      }
-      progress$set(value = value, detail = detail)
-    }
-    
-    # Compute the new data, and pass in the updateProgress function so
-    # that it can update the progress indicator.
-    compute_data(updateProgress)
+  output$table <- DT::renderDataTable({
+    print(paste("Dentro de output"))
+    server_table (input, output,session)
   })
-    
+  output$table1 <- DT::renderDataTable({
+    print(paste("Dentro de output"))
+    server_table (input, output,session)
+  })
+  output$table2 <- DT::renderDataTable({
+    print(paste("Dentro de output"))
+    server_table (input, output,session)
+  })
+  output$table3 <- DT::renderDataTable({
+    print(paste("Dentro de output"))
+    server_table (input, output,session)
+  })
+  output$table4 <- DT::renderDataTable({
+    print(paste("Dentro de output"))
+    server_table (input, output,session)
+  })
+  output$table5 <- DT::renderDataTable({
+    print(paste("Dentro de output"))
+    server_table (input, output,session)
+  })
+  output$table6 <- DT::renderDataTable({
+    print(paste("Dentro de output"))
+    server_table (input, output,session)
+  })
+  #output es una lista que "anota" qué es lo que tiene que mostrar. En este caso
+  # le decimos que tieene que hacer un histograma
+  output$HistPlot <- renderPlot({
+    print(paste("Dentro de HistPlot"))
+    # faithful es un dataset que viene precargado en R.
+    datos  <- data.frame(faithful$waiting)
+    # lo que hace es discretizar a los waiting times entre erupción según la cantidad
+    # de bins que el usuario elija. inputs es una lista que "anota" lo que le manda 
+    # el usuario
+    ggplot(datos) +
+      geom_histogram(aes(x=faithful.waiting),fill="#75AADB",bins=input$bins) +
+      labs(title=isolate({input$titulo}),
+           x="Tiempo de espera hasta la próxima erupción (minutos)")
+  })
+  output$HistPlot2 <- renderPlot({
+    print(paste("Dentro de HistPlot"))
+    # faithful es un dataset que viene precargado en R.
+    datos  <- data.frame(faithful$waiting)
+    # lo que hace es discretizar a los waiting times entre erupción según la cantidad
+    # de bins que el usuario elija. inputs es una lista que "anota" lo que le manda 
+    # el usuario
+    ggplot(datos) +
+      geom_histogram(aes(x=faithful.waiting),fill="#75AADB",bins=input$bins) +
+      labs(title=isolate({input$titulo}),
+           x="Tiempo de espera hasta la próxima erupción (minutos)")
+  })
+  output$HistPlot3 <- renderPlot({
+    print(paste("Dentro de HistPlot"))
+    # faithful es un dataset que viene precargado en R.
+    datos  <- data.frame(faithful$waiting)
+    # lo que hace es discretizar a los waiting times entre erupción según la cantidad
+    # de bins que el usuario elija. inputs es una lista que "anota" lo que le manda 
+    # el usuario
+    ggplot(datos) +
+      geom_histogram(aes(x=faithful.waiting),fill="#75AADB",bins=input$bins) +
+      labs(title=isolate({input$titulo}),
+           x="Tiempo de espera hasta la próxima erupción (minutos)")
+  })
+  output$HistPlot4 <- renderPlot({
+    print(paste("Dentro de HistPlot"))
+    # faithful es un dataset que viene precargado en R.
+    datos  <- data.frame(faithful$waiting)
+    # lo que hace es discretizar a los waiting times entre erupción según la cantidad
+    # de bins que el usuario elija. inputs es una lista que "anota" lo que le manda 
+    # el usuario
+    ggplot(datos) +
+      geom_histogram(aes(x=faithful.waiting),fill="#75AADB",bins=input$bins) +
+      labs(title=isolate({input$titulo}),
+           x="Tiempo de espera hasta la próxima erupción (minutos)")
+  })
+  output$DensPlot <- renderPlot({
+    print(paste("Dentro de renderplot0"))
+    # faithful es un dataset que viene precargado en R.
+    datos  <- data.frame(faithful$waiting)
+    # lo que hace es discretizar a los waiting times entre erupción según la cantidad
+    # de bins que el usuario elija. inputs es una lista que "anota" lo que le manda 
+    # el usuario
+    ggplot(datos) +
+      geom_density(aes(x=faithful.waiting),fill="#75AADB") +
+      labs(title=isolate({input$titulo}),
+           x="Tiempo de espera hasta la próxima erupción (minutos)")
+  })
      
 })
