@@ -168,7 +168,7 @@ body <- dashboardBody(
                   fluidRow(
                   
                     tabBox(
-                      title = "First tabBox",
+                      title = "Recomendaciones OMS",
                       # The id lets us use input$tabset1 on the server to find the current tab
                       id = "tabset1", height = "250px",
                       tabPanel("Tab1", "First tab content"),
@@ -179,16 +179,8 @@ body <- dashboardBody(
                                       min = 1,
                                       max = 50,
                                       value = 30),width = 4)
-                    )),
-                  fluidRow(tabBox(
-                      side = "right", height = "250px",
-                      selected = "Tab3",
-                      tabPanel("Tab1", "Tab content 1"),
-                      tabPanel("Tab2", "Tab content 2"),
-                      tabPanel("Tab3", "Note that when side=right, the tab order is reversed."),
-                      dataTableOutput('table3') 
-                    )
-                  ),
+                    )) 
+                   
                  
         ),
      

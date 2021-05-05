@@ -235,5 +235,19 @@ donwload_scrapingWorldometers <- function (input, output,session) {
 #
 donwload_scrapingOMS <- function (input, output,session) {
   url_recomendationsOMS ='https://www.who.int/es/emergencies/diseases/novel-coronavirus-2019/advice-for-public'
-  html <-  url_recomendationsOMS  %>% read_html() %>% html_nodes(".row")
+  html <-  url_recomendationsOMS  %>% read_html()  
+  #obtenemos sólo los poster resumen de las recomendaciones de la OMS
+  images <- html %>% html_nodes(".lazy") %>% lapply(., function (node) {
+                                                        df <- NULL
+                                                        is_corona <- node %>% html_attr ('data-src')%>%grepl('coronavirus',.) 
+                                                        if(is_corona) {
+                                                          alt  <- node %>% html_attr ('alt')
+                                                          href <- paste ("https://www.who.int",node %>% html_attr ('data-image'),sep='/')
+                                                          df <- data.frame (title =alt,href=href)
+                                                          
+                                                        } 
+                                                        df
+                                                      }) 
+ 
+  list_images_html (images [!sapply(images, is.null)])
 }

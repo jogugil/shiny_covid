@@ -42,7 +42,11 @@ updateProgress <- function(value = NULL, detail = NULL,progress=NULL) {
   }
   progress$set(value = value, detail = detail)
 }
-#  
+# #################
+# Función para crear el nomre del fichero para su descarga y almacen en disco local
+#@param path
+#@param name
+#@param ext
 #  
 createFilename <- function (path = '.7', name = 'file',ext= 'csv') {
   date <- Sys.Date()
@@ -50,4 +54,72 @@ createFilename <- function (path = '.7', name = 'file',ext= 'csv') {
   filename  <- paste (filename ,ext,sep=".")
   filename  <- paste (path,filename  ,sep="/")
   filename
+}
+#################
+# función que corrige texto
+###############
+clean.text = function(x) {
+  # tolower
+  x = toupper(x)
+  # remover signos de puntuaión
+  x = gsub("[[:punct:]]", "", x)
+  # remover numeros
+  x = gsub("[[:digit:]]", "", x)
+  # remover tabs
+  x = gsub("[ |\t]{2,}", "", x)
+  # remover espacios en blanco al comienzo
+  x = gsub("^ ", "", x)
+  # remover espacios vacios al final
+  x = gsub(" $", "", x)
+  return(x)
+}
+################
+# función transformar un número en carácter a numérico 
+###############
+numberchange <- function (x){
+  
+  # eliminar el “.” que se utiliza como separador de miles
+  x <- gsub("\\.", "",x)
+  # la”," se reemplaza por el “.”.
+  x <- gsub(",", ".",x)
+  x <- as.numeric(x)
+  
+  
+}
+
+################
+# función Crea una lista en un bloque html de titulo e imagen a partir de una lista 
+# donde cada elemento de la lista tiene dos parámetros:
+# title: titulo de la imagen
+# href: link donde se encuentra la imagen
+###############
+elem_table_list_images <- function (elem) {
+  str_html__elem_Cap <- "<tr> <td style=\'width: 100%;\'>"
+  str_html_elem_mid <- "</td></tr><tr><td style=\'width: 100%;\'><img src="
+  str_html_elem_end <- " alt=\'\'/></td></tr>"
+  
+  html  <- paste (str_html__elem_Cap,elem['title'])
+  html  <- paste (html,str_html_elem_mid)
+  html  <- paste (html,elem['href'])
+  html  <- paste (html,str_html_elem_end)  
+  html
+}                                     
+list_images_html <- function (list_src){
+  str_div_cap <-"<div class=\'list-recomen\'>"
+ 
+  
+  str_html_table_cap <- "<table style=\'border-collapse: collapse; width: 37.1547%;\' border=\'0\'><tbody> "
+  
+  str_html_table_end <- "</tbody></table></div>" 
+  
+  #Recorremos la lista de imágenes 
+  images <- lapply(list_src, elem_table_list_images)
+   
+  #Creamos el bloque html 
+  html  <- paste (str_div_cap,str_html_table_cap)
+  html  <- paste (html,images)
+  html  <- paste (html,str_html_table_end)
+  html  <- paste (html,str_html_elem_end)  
+  html
+  
 }
