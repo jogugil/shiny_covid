@@ -163,7 +163,6 @@ body <- dashboardBody(
           tabName = "about",
           style = "overflow-y: auto;", 
           source("./pages/about.R"),
-          
         )
       )
     )

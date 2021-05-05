@@ -249,5 +249,5 @@ donwload_scrapingOMS <- function (input, output,session) {
                                                         df
                                                       }) 
  
-  list_images_html (images [!sapply(images, is.null)])
+  images [!sapply(images, is.null)] 
 }
