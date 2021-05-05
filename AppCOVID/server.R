@@ -68,6 +68,7 @@ shinyServer(function(input, output,session) {
   ###################################
   ### Descarga y actualización de datos
   ##################################
+  
   output$TextDataGlobalUpdate <- renderText({ paste (download_filesCSVOMS (input, output,session),donwload_scrapingWorldometers(input, output,session),sep='\n') })
   
   
@@ -118,6 +119,9 @@ shinyServer(function(input, output,session) {
      
     plot(cars$speed, cars$dist)
   })
+  
+  
+  
   # This example uses the Progress object API directly. This is useful because
   # calls an external function to do the computation.
   output$table <- DT::renderDataTable({

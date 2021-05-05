@@ -132,58 +132,25 @@ body <- dashboardBody(
           source("./pages/covidRec.R"), 
           
         ),
-        
-          tabItem(
-             
-            tabName = "globalDataUpdate",
-            
-            p("Actualizando los datos Globales!!!!!") ,
-            verbatimTextOutput("TextDataGlobalUpdate")
-               
-             
-          ),
-          tabItem(
-           
-            tabName = "spanhisDataUpdate",
+        tabItem( tabName = "globalDataUpdate", 
+                 p("Actualizando los datos Globales!!!!!") ,
+                 verbatimTextOutput("TextDataGlobalUpdate")
+        ),
+        tabItem(  tabName = "spanhisDataUpdate",
             p("Actualización de datos a novel nacional") ,
             DT::dataTableOutput('table1'),
-                
-                p("Actualización de datos a novel nacional") 
-              
-             
-            
-          ), tabItem(
-           
-            tabName = "ValenciaDataUpdate",
+            p("Actualización de datos a novel nacional")
+        ), tabItem( tabName = "ValenciaDataUpdate",
             fluidRow(
               box(
-                  dataTableOutput('table2')),
-                 box(plotOutput('plot', width = "300px", height = "300px")),
+                dataTableOutput('table2')),
+                box(plotOutput('plot', width = "300px", height = "300px")),
                 p("Actualización de datos Comunidad Valenciana") 
             )
-             
-            
-          ), 
-          tabItem(tabName = "recomendacionesOMSUpdate",
-                  fluidRow(
-                  
-                    tabBox(
-                      title = "Recomendaciones OMS",
-                      # The id lets us use input$tabset1 on the server to find the current tab
-                      id = "tabset1", height = "250px",
-                      tabPanel("Tab1", "First tab content"),
-                      tabPanel("Tab2", "Tab content 2"),
-                      box(plotOutput("HistPlot"), width=6),
-                      box(sliderInput(inputId = "bins",
-                                      label = "Number of bins:",
-                                      min = 1,
-                                      max = 50,
-                                      value = 30),width = 4)
-                    )) 
-                   
-                 
-        ),
-     
+        ), 
+        tabItem(tabName = "recomendacionesOMSUpdate",
+                  fluidRow(uiOutput("tabsRecomendaOMS"))
+        ), 
         #GUIDELINE
         tabItem(
             tabName = "guideline",
@@ -198,8 +165,9 @@ body <- dashboardBody(
           source("./pages/about.R"),
           
         )
+      )
     )
-)
+
 
 
 dashboardPage(
