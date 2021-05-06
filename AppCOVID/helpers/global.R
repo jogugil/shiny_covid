@@ -18,7 +18,8 @@ PKI_WD          <- c('Id','World-country-continental','TotalCases','NewCases','T
                     'NewRecovered','ActiveCases','CritcalCase','TotalCase1M','DeathsCase1M','TotalTests','test1Mpop',
                     'Population','Continent','Caseevery','Deathevery','Testevery','newCase1M','deathsCase1M','ActiveCas1M')
  
-
+i18n <- Translator$new(translation_json_path = "./translations/translations.json")
+i18n$set_translation_language("es")
 #####################################################################
 #Descargamos los datos y grabamos en el directorio de datos de la APP
 #####################################################################
@@ -252,7 +253,7 @@ donwload_scrapingOMS <- function (input, output,session) {
                                                             label <- str_trim(substring(alt,is_ptr[[2]]+1))
                                                           label <- gsub (" ","_",label)
                                                           printApp (label)
-                                                          filename <- paste(PATH_DATA,str_trim(label),sep='/')
+                                                          filename <- paste(PATH__RECOMEN_IMG_OMS,str_trim(label),sep='/')
                                                           filename <- paste(str_trim(filename),'png',sep='.')
                                                           print (filename)
                                                           href <- paste ("https://www.who.int",node %>% html_attr ('data-image'),sep='/')
@@ -278,19 +279,25 @@ donwload_scrapingOMS <- function (input, output,session) {
 #
 
 load_filesRecomOMS<- function (input, output,session) {
-  patron <- ".\\w*$" #Eliminamos la extensión del fichero (en teoria tendría que ser png, aqui no se comprueba)
+  patron <- ".\\w*$" #Eliminamos la extensión del fichero (tendría que ser png, aquí no se comprueba)
   files  <-  list.files(path=PATH__RECOMEN_IMG_OMS,pattern='*.png')
-  l      <- length(files)
-  
-  if (l > 0) {
+  l   <- length(files)
+  mytabs <- NULL
+  if (l>0) {
+    #Copiamos al directorio cache (www) los ficheros png
+    lapply(files, function(x) file.copy(paste (PATH__RECOMEN_IMG_OMS, x , sep = "/"),
+                                              paste ("www",x, sep = "/"), recursive = FALSE,  copy.mode = TRUE))
+    
     mytabs <- lapply(1:l, function(i) {
-      label <- file[i] %>% sub (patron,"",.)%>% str_trim(.)
-      tabPanel(title = label,h1(label()), fluidRow(tags$img(src = files [i])))
+      title <- files[i] %>% sub (patron,"",.)%>% str_trim(.)
+      label <- paste("R",i," ")
+      label <- str_trim(label)
+      tabPanel(title = label,h1(gsub("_"," ",title)), fluidRow(tags$img(src = files [i],width=250)))
     })
-    return (mytabs)
-  } else {
-    mytabs <- tabPanel(title = 'R 0', fluidRow(h3("No existen recomendaciones de la OMS.")))
-    return (mytabs)
+    if(is.null(mytabs)) {
+      mytabs <- tabPanel(title = 'R 0', fluidRow(h3("No existen recomendaciones de la OMS.")))
+    }
   }
-  
+  mytabs
 }
+

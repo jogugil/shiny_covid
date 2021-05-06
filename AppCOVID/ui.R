@@ -17,7 +17,7 @@ library(Hmisc)
 library(mlbench)
 library(mice)
 library(shiny.router)
- 
+library(shiny.i18n)
 
 directorio <- getwd()
 cat(file=stdout()," Este es el drectorio:",directorio)
@@ -27,9 +27,19 @@ cat(file=stdout()," Este es el drectorio:",directorio)
 source("./helpers/global.R")
 
 
+
 header <- dashboardHeader(
   title =  "COVID 19. DV.2020-21",
-  titleWidth = 250   
+  titleWidth = 250,tags$li( fluidRow( 
+    shiny.i18n::usei18n(i18n),
+    div(style="display: inline-block;vertical-align:top; font-size: 10px; height=30px;width: 150px;",selectInput(
+      inputId='selected_language',
+      label=i18n$t('Cambiar idioma'),
+      choices = i18n$get_languages(),
+      selected = i18n$get_key_translation()
+    )) 
+   ),
+  class = "dropdown")
    
 )
 
@@ -49,32 +59,32 @@ sidebar <- dashboardSidebar(
         tags$hr(),
  
         menuItem(
-            "Seguimiento COVID19", 
+            i18n$t("Seguimiento COVID-19"), 
             tabName = "Options", 
             icon = icon("home"),
             selected=TRUE, 
-            menuSubItem( "Global",selected=TRUE,  tabName ="globalData" ),
-            menuSubItem( "España - por Couminidades",selected=FALSE,  tabName ="spanhisData" ),
-            menuSubItem( "Comunidad Valenciana",selected=FALSE,  tabName ="ValenciaData" ),
-            menuSubItem( "Recomendaciones de la OMS",selected=FALSE,  tabName ="recomendacionesOMS" )
+            menuSubItem( i18n$t("Global"),selected=TRUE,  tabName ="globalData" ),
+            menuSubItem( i18n$t("España - Comunidades"),selected=FALSE,  tabName ="spanhisData" ),
+            menuSubItem( i18n$t("Comunidad Valenciana"),selected=FALSE,  tabName ="ValenciaData" ),
+            menuSubItem( i18n$t("Recomendaciones de la OMS"),selected=FALSE,  tabName ="recomendacionesOMS" )
           ),
         menuItem(
-             "Actualización de datos", 
+            i18n$t("Actualización de datos"), 
             tabName = "DataUpdate", 
             icon = icon("refresh"),
             selected=FALSE, 
-            menuSubItem( "Global",selected=FALSE,tabName ="globalDataUpdate"  ),
-            menuSubItem( "España -por Couminidades", selected=FALSE,tabName ="spanhisDataUpdate" ),
-            menuSubItem( "Comunidad Valenciana", selected=FALSE,tabName ="ValenciaDataUpdate" ),
-            menuSubItem( "Recomendaciones de la OMS", selected=FALSE,tabName ="recomendacionesOMSUpdate" )
+            menuSubItem( i18n$t("Global"),selected=FALSE,tabName ="globalDataUpdate"  ),
+            menuSubItem( i18n$t("España - Comunidades"), selected=FALSE,tabName ="spanhisDataUpdate" ),
+            menuSubItem( i18n$t("Comunidad Valenciana"), selected=FALSE,tabName ="ValenciaDataUpdate" ),
+            menuSubItem( i18n$t("Recomendaciones de la OMS"), selected=FALSE,tabName ="recomendacionesOMSUpdate" )
           ),
         menuItem(
-            "Información y ayuda de la APP", 
+          i18n$t("Información y ayuda de la APP"), 
              icon = icon("question-circle"),
             selected=FALSE,  tabName ="guideline" 
           ),
         menuItem(
-           "Sobre nosotros",  
+          i18n$t("Sobre nosotros"),  
             icon = icon("info-circle"),
             selected=FALSE,  tabName =  "about"        
             )
@@ -92,7 +102,7 @@ body <- dashboardBody(
             style="overflow-y: auto;",
             tabName = "globalData",
             navbarPage(
-              'Datos Globales',
+              i18n$t('Datos Globales'),
               tabPanel("Resumen"),
               tabPanel("Por país")
             ),
@@ -102,7 +112,7 @@ body <- dashboardBody(
           style="overflow-y: auto;",
           tabName = "spanhisData",
           navbarPage(
-            'España - Comunidades',
+            i18n$t('España - Comunidades'),
             tabPanel("Component 1"),
             tabPanel("Component 2"),
             tabPanel("Component 3")
@@ -113,7 +123,7 @@ body <- dashboardBody(
           style="overflow-y: auto;",
           tabName = "ValenciaData",
           navbarPage(
-            'Comunidad Valenciana',
+            i18n$t('Comunidad Valenciana'),
             tabPanel("Component 1"),
             tabPanel("Component 2"),
             tabPanel("Component 3")
@@ -123,33 +133,29 @@ body <- dashboardBody(
         ),tabItem(
           style="overflow-y: auto;",
           tabName = "recomendacionesOMS",
-          navbarPage(
-            'Recomendaciones',
-            tabPanel("Component 1"),
-            tabPanel("Component 2"),
-            tabPanel("Component 3")
-          ),
           source("./pages/covidRec.R"), 
         ),
         tabItem( tabName = "globalDataUpdate", 
-                 p("Actualizando los datos Globales!!!!!") ,
-                 verbatimTextOutput("TextDataGlobalUpdate")
+                 p(i18n$t("Actualizando los datos Globales!!!!!")) ,
+                 h3(verbatimTextOutput("TextDataGlobalUpdate"))
         ),
         tabItem(  tabName = "spanhisDataUpdate",
-            p("Actualización de datos a novel nacional") ,
+            p(i18n$t("Actualización de datos a nivel nacional!!!!")) ,
             DT::dataTableOutput('table1'),
-            p("Actualización de datos a novel nacional")
+ 
         ), tabItem( tabName = "ValenciaDataUpdate",
             fluidRow(
               box(
                 dataTableOutput('table2')),
-                box(plotOutput('plot', width = "300px", height = "300px")),
-                p("Actualización de datos Comunidad Valenciana") 
+                p(i18n$t("Actualización de datos Comunidad Valenciana!!!!")),
+                box(plotOutput('plot', width = "300px", height = "300px"))
+                
             )
         ), 
         tabItem(
                 tabName = "recomendacionesOMSUpdate",
-                fluidRow(uiOutput("tabsRecomendaOMS"))
+                p(i18n$t("Actualizando los datos de recomendaciones de la OMS!!!!!")),
+                h3(verbatimTextOutput("tabsRecomendaOMS"))
         ), 
         #GUIDELINE
         tabItem(

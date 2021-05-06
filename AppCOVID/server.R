@@ -75,8 +75,7 @@ shinyServer(function(input, output,session) {
   ###################################
   ### VISUALIZACIÓN DE DATOS#########
   ###################################
-  
-  
+ 
   ###########
   #
   # DATOS GLOBALES
@@ -97,28 +96,49 @@ shinyServer(function(input, output,session) {
   
   ###########
   #
-  # RECOMENDACIONES DE LA OMS (CARGAMOS LOS POSTERS al macenados en local y bajados desde su web)
+  # RECOMENDACIONES DE LA OMS (CARGAMOS LOS POSTERS almacenados en local y bajados desde su web)
   #
   ###########
   
  output$tabsBoxRecomendaOMS <- renderUI({
-   printApp(" ENTRO EN output$tabsBoxRecomendaOMS")
-    images <- load_filesRecomOMS (input, output,session)
-    l   <- length(images)
-    myTabs <- load_filesRecomOMS ()
-    if (!is.null(myTabs))
-      do.call(tabBox, args = c(width = 250,title="Recomendaciones de la OMS sobre el COVID 19", myTabs))
-    else
-      Box(h3("No existen recomendaiones de la OMS en estos momentos."))
-    printApp(" SALGO DE output$tabsBoxRecomendaOMS")
+    mytabs <- load_filesRecomOMS ()
+    if(!is.null(mytabs)) {
+      do.call(tabBox, args = c(width = 350,title="Recomendaciones de la OMS sobre el COVID 19", mytabs))
+    } else {
+      box(h3("No existen recomendaiones de la OMS en estos momentos."))
+    }
   }) 
 
   ###################################
   ### Descarga y actualización de datos
   ##################################
-  
+  ###############
+  # Descarga y actualiza los datos internacionales sobre el COVID-19
+  ##############
   output$TextDataGlobalUpdate <- renderText({ paste (download_filesCSVOMS (input, output,session),donwload_scrapingWorldometers(input, output,session),sep='\n') })
-  # the progress API.
+ 
+   ###############
+  # Descarga y actualiza los datos a Nivel Nacional sobre el COVID-19
+  ##############
+  
+  ###############
+  # Descarga y actualiza los datos de la Comunidad Valenciana sobre el COVID-19
+  ##############
+  
+  ###############
+  #Descarga las recomendaciones de la OMS sobre el COVID-19
+  ###############
+  output$tabsRecomendaOMS <- renderText({
+    images <- donwload_scrapingOMS (input, output,session)
+    l   <- length(images)
+    if(l>0)
+      paste0("Se ha actualizado las recomendaciones de la OMS sobre el COVID-19!!.","\n")
+    else
+      paste0("No existen recomendaiones actualmente sobre el COVID-19."," \n")
+    
+  }) 
+  ###########################################################################
+ 
   output$plot <- renderPlot({
     if (DEBUG) print(paste0("Entramos en el progreso plot"))
     
@@ -166,17 +186,7 @@ shinyServer(function(input, output,session) {
     plot(cars$speed, cars$dist)
   })
   
-  output$tabsRecomendaOMS <- renderUI({
-    images <- donwload_scrapingOMS (input, output,session)
-    l   <- length(images)
-    myTabs <- lapply(1:l, function(i) {
-      label <- paste("R",i," ")
-      label <- str_trim(label)
-      tabPanel(title = label,h1(images[[i]]$title), fluidRow(tags$img(src =images[[i]]$href)) )
-    })
-    do.call(tabBox, args = c(width = 250,title="Recomendaciones de la OMS sobre el COVID 19", myTabs))
-  
-  }) 
+
   
   # This example uses the Progress object API directly. This is useful because
   # calls an external function to do the computation.

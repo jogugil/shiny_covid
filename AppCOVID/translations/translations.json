@@ -1,20 +1,62 @@
 {
   "languages": ["es", "en"],
   "translation": [
-      {"es": "Seguimiento COVID19", "en": "COVID 19 tracking"},
-      {"es": "Global", "en": "Global Information"},
-      {"es": "España -por Couminidades", "en": "Spanish Data"},
-      {"es": "Comunidad Valenciana", "en": "CV Data"},
-      {"es": "Recomendaciones de la OMS", "en": "Recommendations"},
-      {"es": "    Actualización de datos", "en": "Data Update"}, 
-      {
-        "es": "Información y ayuda de la APP",
-        "en": "Info-Help"
-      },
+    {
+      "es": "Seguimiento COVID-19",
+      "en": "COVID-19 tracking"
+    },
+    {
+      "es": "Global",
+      "en": "Global Information"
+    },
+    {
+      "es": "Recomendaciones de la OMS",
+      "en": "Recommendations"
+    },
+    {
+      "es": "Actualización de datos",
+      "en": "Data Update"
+    },
+    {
+      "es": "Datos Globales",
+      "en": "Global Data"
+    },
+    {
+      "es": "España - Comunidades",
+      "en": "Spain - Communities"
+    },
+    {
+      "es": "Comunidad Valenciana",
+      "en": "Community of Valencia"
+    },
+    {
+      "es": "Actualizando los datos Globales!!!!!",
+      "en": "Updating Global Data!!!!!"
+    },
+    {
+      "es": "Actualización de datos a nivel nacional!!!!",
+      "en": "National data update!!!!"
+    },
+    {
+      "es": "Actualizando los datos de recomendaciones de la OMS!!!!!",
+      "en": "Updating OMS's recommendations data!!!!!"
+    },
+    {
+      "es": "Actualización de datos Comunidad Valenciana!!!!",
+      "en": "Data update Valencian Community!!!!"
+    },
+    {
+      "es": "Información y ayuda de la APP",
+      "en": "Info-Help"
+    },
     {
       "es": "Sobre nosotros",
       "en": "about"
-    } 
-       
-    ]
+    },
+    {
+      "es": "Cambiar idioma",
+      "en": "Change language"
+    }
+    
+  ]
 }
