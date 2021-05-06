@@ -3,7 +3,17 @@
 ## Estas funciones utilizarán el fichero:
 ##  "global.R" que contiene las constantes y la carga de datos
 ########################################################################
+########################
+##
+# Función printApp : Comprueba si el Flag DEBUG esta activo y si lo está escribe en el 
+# fichero que se le indica. Por defecto el fichero es stdout (la salida estandar)
+# @param : sText -> Cadena a mostrar
 
+#############
+printApp <- function (sText,file=stdout()) {
+  if(DEBUG)
+    print(file=file,sText)
+}
 ############################
 ## Función Timer que contabiliza si se ha pasado de x segundos
 ##

@@ -130,7 +130,6 @@ body <- dashboardBody(
             tabPanel("Component 3")
           ),
           source("./pages/covidRec.R"), 
-          
         ),
         tabItem( tabName = "globalDataUpdate", 
                  p("Actualizando los datos Globales!!!!!") ,
@@ -148,8 +147,9 @@ body <- dashboardBody(
                 p("Actualización de datos Comunidad Valenciana") 
             )
         ), 
-        tabItem(tabName = "recomendacionesOMSUpdate",
-                  fluidRow(uiOutput("tabsRecomendaOMS"))
+        tabItem(
+                tabName = "recomendacionesOMSUpdate",
+                fluidRow(uiOutput("tabsRecomendaOMS"))
         ), 
         #GUIDELINE
         tabItem(
@@ -166,9 +166,6 @@ body <- dashboardBody(
         )
       )
     )
-
-
-
 dashboardPage(
     header, 
     sidebar, 

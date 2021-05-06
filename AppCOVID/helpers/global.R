@@ -8,8 +8,9 @@ library(rvest)
 source("./helpers/helpers.R")
 
 DEBUG <- TRUE
-PATH_DATA     <-"./data"
-STANDBY_TIME  <- 15
+PATH_DATA                 <-"./data"
+PATH__RECOMEN_IMG_OMS     <-"./data/RECOM/OMS"
+STANDBY_TIME    <- 15
 PKI_OMS         <- c("Name","Region","casesCumulative","cumulative100000p","reported7d","reported7d100000p",
                        "reported24h","deathsCumulative","deathsCumulative100000p","deathsreported7d",
                        "deathsreported7d100000p","deathsreported24h","transmisionType")
@@ -233,6 +234,7 @@ donwload_scrapingWorldometers <- function (input, output,session) {
 # url_en_recomendationsOMS ='https://www.who.int/emergencies/diseases/novel-coronavirus-2019/advice-for-public'
 
 #
+
 donwload_scrapingOMS <- function (input, output,session) {
   url_recomendationsOMS ='https://www.who.int/es/emergencies/diseases/novel-coronavirus-2019/advice-for-public'
   html <-  url_recomendationsOMS  %>% read_html()  
@@ -241,13 +243,46 @@ donwload_scrapingOMS <- function (input, output,session) {
                                                         df <- NULL
                                                         is_corona <- node %>% html_attr ('data-src')%>%grepl('coronavirus',.) 
                                                         if(is_corona) {
-                                                          alt  <- node %>% html_attr ('alt')
+                                                          printApp (node %>% html_attr ('alt') )
+                                                          alt  <- node %>% html_attr ('alt')  
+                                                          is_ptr <- alt %>% stringr::str_locate (.,"^COVID-19 :")
+                                                          printApp (is_ptr)
+                                                          label <- alt
+                                                          if(!is.na(is_ptr[[2]]))
+                                                            label <- str_trim(substring(alt,is_ptr[[2]]+1))
+                                                          label <- gsub (" ","_",label)
+                                                          printApp (label)
+                                                          filename <- paste(PATH_DATA,str_trim(label),sep='/')
+                                                          filename <- paste(str_trim(filename),'png',sep='.')
+                                                          print (filename)
                                                           href <- paste ("https://www.who.int",node %>% html_attr ('data-image'),sep='/')
+                                                          print(href)
                                                           df <- data.frame (title =alt,href=href)
-                                                          
+                                                          download.file(href, destfile = filename, mod = "wb")
                                                         } 
                                                         df
                                                       }) 
  
-  images [!sapply(images, is.null)] 
+  images <- images [!sapply(images, is.null)]
+  images
+}
+
+########################################################################
+## CARGAR FICHEROS PNG DESCARGADOS DE LA web OMS - Recomendaciones######
+######################################################################
+# Cargamos los nombres de los ficheros y su path del directorio donde se almacena
+# en local estos ficheros:
+#
+# PATH__RECOMEN_IMG_OMS     <-"./data/RECOM/OMS"
+# 
+#
+
+load_filesRecomOMS<- function (input, output,session) {
+  patron <- ".\\w*$" #Eliminamos la extensión del fichero (en teoria tendría que ser png, aqui no se comprueba)
+  files  <-  list.files(path=PATH__RECOMEN_IMG_OMS,pattern='*.png')
+  l      <- length(files)
+  lapply(1:l, function(i) {
+    label <- file[i] %>% sub (patron,"",.)%>% str_trim(.)
+    tabPanel(title = label,h1(label()), fluidRow(tags$img(src = files [i])) )
+  })
 }

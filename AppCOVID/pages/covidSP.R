@@ -1,7 +1,7 @@
 tabItem(
        fluidRow(
         column(width = 2,
-          p("ES LA PASINA DE DATOS DE ESPAÑA")
+          p("SON LOS DATOS DE ESPAÑA")
         ),
         column(width =2,
                # A static infoBox
