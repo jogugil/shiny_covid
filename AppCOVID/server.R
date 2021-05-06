@@ -17,7 +17,7 @@ source("./helpers/helpers.R")
 
 
 
-
+glUpdateMesaje <- ""
 # Define server logic required to draw a histogram
 
 compute_data <- function(updateProgress = NULL) {
@@ -76,6 +76,14 @@ shinyServer(function(input, output,session) {
   #######################
   observeEvent(input$selected_language, {
     update_lang(session, input$selected_language)
+    globalUpdate_var()
+  })
+  #############
+  ##
+  # Con tenido dinámico a traducir
+  ###########
+  globalUpdate_var <- reactive ({
+     load_Data (input, output,session)
   })
   
   ###################################
@@ -85,7 +93,8 @@ shinyServer(function(input, output,session) {
   ## Actualizamos los datos al entrar a la app
   #######
   output$globalUpdate <- renderText({
-    load_Data (input, output,session)
+      i18n$t(globalUpdate_var())
+     
   }) 
   ###########
   #

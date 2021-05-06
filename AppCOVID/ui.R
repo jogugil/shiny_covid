@@ -61,7 +61,7 @@ sidebar <- dashboardSidebar(
   width = 250,
     sidebarMenu(
         id="selectionMenu",
-        div (class="text",h3(verbatimTextOutput("globalUpdate"))),
+        div (class="text",h3(i18n$t(verbatimTextOutput("globalUpdate")))),
         tags$hr(),
  
         menuItem(
