@@ -71,11 +71,22 @@ server_table <- function (input,output,session) {
 
 shinyServer(function(input, output,session) {
   
+  ##########################
+  # Internacionalización
+  #######################
+  observeEvent(input$selected_language, {
+    update_lang(session, input$selected_language)
+  })
   
   ###################################
   ### VISUALIZACIÓN DE DATOS#########
   ###################################
- 
+  ############
+  ## Actualizamos los datos al entrar a la app
+  #######
+  output$globalUpdate <- renderText({
+    load_Data (input, output,session)
+  }) 
   ###########
   #
   # DATOS GLOBALES

@@ -20,6 +20,91 @@ PKI_WD          <- c('Id','World-country-continental','TotalCases','NewCases','T
  
 i18n <- Translator$new(translation_json_path = "./translations/translations.json")
 i18n$set_translation_language("es")
+
+df <- data.frame(
+  val = i18n$get_languages()
+)
+
+df$img <- lapply (1:length(df$val),function (i) {
+                                    img_lang <- paste (str_trim(df$val[i]),"ico",sep=".")
+                                    sprintf("<div class='jhr'><img src=\'/img/%s\',width=30px,style=\'vertical-align:middle\' >%s</img></div>",img_lang, df$val[i])
+                                })
+ 
+####################################################################
+#  Mamipulación de datos globales #################################
+###################################################################
+##############
+#
+# Crea y descarga los ficheros CSV de datos  del virus
+###############3
+
+download_GlobalFiles <- function () {
+  url_CSVOMS <- "https://covid19.who.int/WHO-COVID-19-global-table-data.csv"
+  url_world  <- "https://www.worldometers.info/coronavirus/"
+  url_cvData  <- "https://dadesobertes.gva.es/dataset/385d7d96-693b-4361-a00f-4e72b30a3695/resource/4dc944c0-c70a-474a-9cb6-288d218a93b7/download/covid-19-total-acumulado-de-casos-confirmados-pcr-altas-epidemiologicas-personas-fallecidas-y-da.csv"
+  #Descargamos el fichero de la OMS
+  filename <- createFilename (path=PATH_DATA,name="globalDataOMS")
+  data_file <- read.csv(url_CSVOMS)
+  names(data_file) <-  PKI_OMS
+  write.csv(data_file,filename)
+  
+  #Descargamos el fichero de   worldometers con web scraping
+  my_table<- url_world %>% read_html() %>% html_table() %>%.[[1]]
+  my_table[]<-lapply(my_table, function(x) (gsub("\\,|\\+", "", (x))))
+  names(my_table) <- PKI_WD
+  
+  # convert all but the first and last column to numeric
+  continent <-  my_table[1:6,]
+  names(continent)[2] <- 'continent'
+  world     <-  my_table[8,]
+  names(world)[2] <- 'world'
+  contry    <-  my_table[9:230,]  
+  names(contry)[2] <- 'contry'
+  
+  fCont <- createFilename (path=PATH_DATA,name="worldometersContinent")
+  write.csv(continent,fCont)
+  fworld <- createFilename (path=PATH_DATA,name="worldometersWorld")
+  write.csv(world,fworld)
+  fcountry <- createFilename (path=PATH_DATA,name="worldometersCountry")
+  write.csv(contry,fcountry)
+  
+  #Descargamos datos de la Comunidad Valenciana
+  
+}
+
+####################
+## Cargamos los ficheros csv que contienen los datos a nivel internacional
+## Ficheros OMS:
+#
+# globalDataOMS_<DATA>.csv
+# 
+### Ficheros https://www.worldometers.info/coronavirus/
+#
+#
+# worldometersContinent_<DATA>.csv
+# worldometersCountry_<DATA>.csv
+# worldometersWorld_<DATA>.csv
+
+###
+load_Data <- function (input, output,session) {
+   nowdate <- Sys.Date ()
+   ##PRimero comprobamos si existe el fichero del día actual
+   ## Si no existe el fichero los actualizamos
+    wldometer_World     <- sprintf("%s/worldometersContinent_%s.csv",PATH_DATA,nowdate)
+    wldometer_Country   <- sprintf("%s/worldometersCountry_%s.csv",PATH_DATA,nowdate)
+    wldometer_Continent <- sprintf("%s/worldometersWorld_%s.csv",PATH_DATA,nowdate)
+    omsGlobal           <- sprintf("%s/globalDataOMS_%s.csv",PATH_DATA,nowdate)
+    
+    if(!file.exists(omsGlobal)) {
+      download_filesCSVOMS (input, output,session)
+    } 
+    if (!file.exists(wldometer_Continent)) {
+      donwload_scrapingWorldometers (input, output,session)
+    } 
+    
+    return ( "Datos Actualizados")
+}
+
 #####################################################################
 #Descargamos los datos y grabamos en el directorio de datos de la APP
 #####################################################################

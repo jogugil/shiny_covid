@@ -18,6 +18,7 @@ library(mlbench)
 library(mice)
 library(shiny.router)
 library(shiny.i18n)
+library (shinyWidgets)
 
 directorio <- getwd()
 cat(file=stdout()," Este es el drectorio:",directorio)
@@ -26,21 +27,27 @@ cat(file=stdout()," Este es el drectorio:",directorio)
 #Cargamos el script global.R que contiene las paginas de navegación y las variables globales a usar
 source("./helpers/global.R")
 
-
+ 
 
 header <- dashboardHeader(
   title =  "COVID 19. DV.2020-21",
-  titleWidth = 250,tags$li( fluidRow( 
+  titleWidth = 250,
+  
+  tags$li( fluidRow( 
     shiny.i18n::usei18n(i18n),
-    div(style="display: inline-block;vertical-align:top; font-size: 10px; height=30px;width: 150px;",selectInput(
-      inputId='selected_language',
-      label=i18n$t('Cambiar idioma'),
-      choices = i18n$get_languages(),
-      selected = i18n$get_key_translation()
-    )) 
+    
+    div(style="display: inline-block; font-size: 10px; height=30px;width: 70px;",
+        pickerInput(inputId = "selected_language",
+                    label = i18n$t('Cambiar idioma'),
+                    choices = df$val,
+                    choicesOpt = list(content = df$img))
+    
+    
+    )
+    
    ),
   class = "dropdown")
-   
+  
 )
 
 
@@ -48,14 +55,13 @@ header <- dashboardHeader(
 sidebar <- dashboardSidebar(
   sidebarUserPanel("Creative Data Science",
                    subtitle = a(href = "#", icon("circle", class = "text-success"), "Online"),
-                   # Image file should be in www/ subdir
                    image = "logo_company.png"
   ), 
   #sidebarSearchForm(label = "Enter a number", "searchText", "searchButton") ,
   width = 250,
     sidebarMenu(
         id="selectionMenu",
-        imageOutput("LogoAPP", inline = TRUE),
+        div (class="text",h3(verbatimTextOutput("globalUpdate"))),
         tags$hr(),
  
         menuItem(
@@ -106,7 +112,7 @@ body <- dashboardBody(
               tabPanel("Resumen"),
               tabPanel("Por país")
             ),
-            source("./pages/covidGlobal.R"), 
+             source("./pages/covidGlobal.R"), 
         ),
         tabItem(
           style="overflow-y: auto;",
@@ -117,7 +123,7 @@ body <- dashboardBody(
             tabPanel("Component 2"),
             tabPanel("Component 3")
           ),
-          source("./pages/covidSP.R"), 
+          #  source("./pages/covidSP.R"), 
           
         ), tabItem(
           style="overflow-y: auto;",
@@ -128,15 +134,15 @@ body <- dashboardBody(
             tabPanel("Component 2"),
             tabPanel("Component 3")
           ),
-          source("./pages/covidCV.R"), 
+         # source("./pages/covidCV.R"), 
           
         ),tabItem(
           style="overflow-y: auto;",
           tabName = "recomendacionesOMS",
-          source("./pages/covidRec.R"), 
+          eval(source("./pages/covidRec.R")), 
         ),
         tabItem( tabName = "globalDataUpdate", 
-                 p(i18n$t("Actualizando los datos Globales!!!!!")) ,
+                 p(i18n$t("Actualizando lo´s datos Globales!!!!!")) ,
                  h3(verbatimTextOutput("TextDataGlobalUpdate"))
         ),
         tabItem(  tabName = "spanhisDataUpdate",
@@ -149,7 +155,6 @@ body <- dashboardBody(
                 dataTableOutput('table2')),
                 p(i18n$t("Actualización de datos Comunidad Valenciana!!!!")),
                 box(plotOutput('plot', width = "300px", height = "300px"))
-                
             )
         ), 
         tabItem(
