@@ -281,8 +281,16 @@ load_filesRecomOMS<- function (input, output,session) {
   patron <- ".\\w*$" #Eliminamos la extensión del fichero (en teoria tendría que ser png, aqui no se comprueba)
   files  <-  list.files(path=PATH__RECOMEN_IMG_OMS,pattern='*.png')
   l      <- length(files)
-  lapply(1:l, function(i) {
-    label <- file[i] %>% sub (patron,"",.)%>% str_trim(.)
-    tabPanel(title = label,h1(label()), fluidRow(tags$img(src = files [i])) )
-  })
+  
+  if (l > 0) {
+    mytabs <- lapply(1:l, function(i) {
+      label <- file[i] %>% sub (patron,"",.)%>% str_trim(.)
+      tabPanel(title = label,h1(label()), fluidRow(tags$img(src = files [i])))
+    })
+    return (mytabs)
+  } else {
+    mytabs <- tabPanel(title = 'R 0', fluidRow(h3("No existen recomendaciones de la OMS.")))
+    return (mytabs)
+  }
+  
 }

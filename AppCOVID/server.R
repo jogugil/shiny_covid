@@ -106,7 +106,10 @@ shinyServer(function(input, output,session) {
     images <- load_filesRecomOMS (input, output,session)
     l   <- length(images)
     myTabs <- load_filesRecomOMS ()
-    do.call(tabBox, args = c(width = 250,title="Recomendaciones de la OMS sobre el COVID 19", myTabs))
+    if (!is.null(myTabs))
+      do.call(tabBox, args = c(width = 250,title="Recomendaciones de la OMS sobre el COVID 19", myTabs))
+    else
+      Box(h3("No existen recomendaiones de la OMS en estos momentos."))
     printApp(" SALGO DE output$tabsBoxRecomendaOMS")
   }) 
 
