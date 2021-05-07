@@ -28,7 +28,7 @@ body_global <- mainPanel(
       column(
         box(
           width = 12,
-          #leafletOutput("overview_map")
+          leafletOutput("global_map1")
         ),
         class = "map",
         width = 8,

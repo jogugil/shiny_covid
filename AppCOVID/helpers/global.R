@@ -5,6 +5,9 @@ library(shiny)
 library(shinydashboard)
 library(tidyverse)
 library(rvest)
+library ("sf")
+library("raster")
+library("leaflet")
 source("./helpers/helpers.R")
 
 DEBUG <- TRUE
@@ -20,7 +23,7 @@ PKI_WD          <- c('Id','World-country-continental','TotalCases','NewCases','T
  
 i18n <- Translator$new(translation_json_path = "./translations/translations.json")
 i18n$set_translation_language("es")
-
+ 
 df <- data.frame(
   val = i18n$get_languages()
 )
@@ -29,7 +32,94 @@ df$img <- lapply (1:length(df$val),function (i) {
                                     img_lang <- paste (str_trim(df$val[i]),"ico",sep=".")
                                     sprintf("<div class='jhr'><img src=\'/img/%s\',width=30px,style=\'vertical-align:middle\' >%s</img></div>",img_lang, df$val[i])
                                 })
+
+sp_COvidData            <- data.frame()
+cv_COvidData            <- data.frame()
+global_COvidDataOMS     <- data.frame()
+global_COvidDataWDMeter <- data.frame()
+
+#datos serie temporales. Los tenemos ya descargados para hacer un poco de todo
+# Si se desean descargar los csv se encuentran:
+#"https://data.humdata.org/hxlproxy/api/data-preview.csv?url=https%3A%2F%2Fraw.githubusercontent.com%2FCSSEGISandData%2FCOVID-19%2Fmaster%2Fcsse_covid_19_data%2Fcsse_covid_19_time_series%2Ftime_series_covid19_confirmed_global.csv&filename=time_series_covid19_confirmed_global.csv"
+
+data_confirmed    <- read_csv("./data/time_series_covid19_confirmed_global.csv")
+data_deceased     <- read_csv("./data/time_series_covid19_deaths_global.csv")
+data_recovered    <- read_csv("./data/time_series_covid19_recovered_global.csv")
+
+#Cargamos los datos de serie temporal por país (Obtenemos la evolución del virus por país)
  
+data_confirmed_sub <- data_confirmed %>%
+  pivot_longer(names_to = "date", cols = 5:ncol(data_confirmed)) %>%
+  group_by(`Province/State`, `Country/Region`, date, Lat, Long) %>%
+  summarise("confirmed" = sum(value, na.rm = T))
+
+data_recovered_sub <- data_recovered %>%
+  pivot_longer(names_to = "date", cols = 5:ncol(data_recovered)) %>%
+  group_by(`Province/State`, `Country/Region`, date, Lat, Long) %>%
+  summarise("recovered" = sum(value, na.rm = T))
+
+data_deceased_sub <- data_deceased %>%
+  pivot_longer(names_to = "date", cols = 5:ncol(data_deceased)) %>%
+  group_by(`Province/State`, `Country/Region`, date, Lat, Long) %>%
+  summarise("deceased" = sum(value, na.rm = T))
+data_evolution <- data_confirmed_sub %>%
+  full_join(data_recovered_sub) %>%
+  full_join(data_deceased_sub) %>%
+  rbind(data_us) %>%
+  ungroup() %>%
+  mutate(date = as.Date(date, "%m/%d/%y")) %>%
+  arrange(date) %>%
+  group_by(`Province/State`, `Country/Region`, Lat, Long) %>%
+  fill(confirmed, recovered, deceased) %>%
+  replace_na(list(deceased = 0, confirmed = 0)) %>%
+  mutate(
+    recovered_est = lag(confirmed, 14, default = 0) - deceased,
+    recovered_est = ifelse(recovered_est > 0, recovered_est, 0),
+    recovered     = coalesce(recovered, recovered_est),
+    active        = confirmed - recovered - deceased
+  ) %>%
+  select(-recovered_est) %>%
+  pivot_longer(names_to = "var", cols = c(confirmed, recovered, deceased, active)) %>%
+  filter(!(is.na(`Province/State`) && `Country/Region` == "US")) %>%
+  filter(!(Lat == 0 & Long == 0)) %>%
+  ungroup()
+
+# Calculamos nuevos casos
+data_evolution <- data_evolution %>%
+  group_by(`Province/State`, `Country/Region`) %>%
+  mutate(value_new = value - lag(value, 4, default = 0)) %>%
+  ungroup()
+
+#Eliminamos los datos que ya no nos sirven
+rm(data_confirmed, data_confirmed_sub, data_recovered, data_recovered_sub, data_deceased, data_deceased_sub)
+
+#creamos un dataframe con el numero de población por país
+
+
+data_evolution <- data_evolution %>%
+  left_join(population, by = c("Country/Region" = "country"))
+ 
+
+data_atDate <- function(inputDate) {
+  data_evolution[which(data_evolution$date == inputDate),] %>%
+    distinct() %>%
+    pivot_wider(id_cols = c("Province/State", "Country/Region", "date", "Lat", "Long", "population"), names_from = var, values_from = value) %>%
+    filter(confirmed > 0 |
+             recovered > 0 |
+             deceased > 0 |
+             active > 0)
+}
+
+data_latest <- data_atDate(max(data_evolution$date))
+
+top5_countries <- data_evolution %>%
+  filter(var == "active", date == current_date) %>%
+  group_by(`Country/Region`) %>%
+  summarise(value = sum(value, na.rm = T)) %>%
+  arrange(desc(value)) %>%
+  top_n(5) %>%
+  select(`Country/Region`) %>%
+  pull()
 ####################################################################
 #  Manipulación de datos globales #################################
 ###################################################################
@@ -73,7 +163,7 @@ download_GlobalFiles <- function () {
 }
 
 ####################
-##  Coprobamos si tenemos los ficheros de este dñia, Si no lso tenemos lso descargamos y ks creamos
+##  Coprobamos si tenemos los ficheros de este día, Si no los tenemos los descargamos y los creamos
 #
 # globalDataOMS_<DATA>.csv
 # 
@@ -85,6 +175,7 @@ download_GlobalFiles <- function () {
 # worldometersWorld_<DATA>.csv
 
 ###
+ 
 load_Data <- function (input, output,session) {
    nowdate <- Sys.Date ()
    ##PRimero comprobamos si existe el fichero del día actual
@@ -101,7 +192,6 @@ load_Data <- function (input, output,session) {
     if (!file.exists(wldometer_Continent)) {
       donwload_scrapingWorldometers (input, output,session)
     } 
-    
     return ( "Datos Actualizados")
 }
 #############################
@@ -391,3 +481,16 @@ load_filesRecomOMS<- function (input, output,session) {
   mytabs
 }
 
+####################################################
+###
+### Descarga ficheros serie temporales impacto covid:
+#####################################################
+
+download_timeseriesCOVIDGLOBAL () {
+  
+  url_confirmed <- 
+  data_deceased     <- read_csv("data/time_series_covid19_deaths_global.csv")
+  data_recovered    <- read_csv("data/time_series_covid19_recovered_global.csv")
+ 
+  
+}

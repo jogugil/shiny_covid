@@ -21,9 +21,11 @@ library(RColorBrewer)
 library(xts)
 library(rgdal)
 
-glUpdateMesaje <- ""
-# Define server logic required to draw a histogram
 
+source("./pages/map1.R", local = TRUE)
+ 
+ 
+  
 compute_data <- function(updateProgress = NULL) {
   # Create 0-row data frame which will be used to store data
   dat <- data.frame(x = numeric(0), y = numeric(0))
@@ -87,9 +89,10 @@ shinyServer(function(input, output,session) {
   # Con tenido dinámico a traducir
   ###########
   globalUpdate_var <- reactive ({
-     load_Data (input, output,session)
+      load_Data (input, output,session)
+     
   })
-  
+  output$globalUpdate <- renderText({ i18n$t(globalUpdate_var()) })
   ###################################
   ### VISUALIZACIÓN DE DATOS#########
   ###################################
