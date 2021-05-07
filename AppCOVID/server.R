@@ -92,16 +92,33 @@ shinyServer(function(input, output,session) {
   ############
   ## Actualizamos los datos al entrar a la app
   #######
-  output$globalUpdate <- renderText({
-      i18n$t(globalUpdate_var())
-     
-  }) 
+  output$casosCoronaWorld <- flexdashboard::renderGauge({
+    gauge(56, min = 0, max = 100, symbol = '%', label = paste("Casos COVID-19. Totales"),gaugeSectors(
+      success = c(100, 6), warning = c(5,1), danger = c(0, 1), colors = c("#9DC3C2")
+    ))
+    
+  })
+  output$casosFallecidosWorld <- flexdashboard::renderGauge({
+    gauge(36, min = 0, max = 100, symbol = '%', label = paste("Fallecidos. Totales"),gaugeSectors(
+      success = c(100, 6), warning = c(5,1), danger = c(0, 1), colors = c("#9DC3C2")
+    ))
+    
+  })
+  output$casosRecuperadosWorld <- flexdashboard::renderGauge({
+    gauge(16, min = 0, max = 100, symbol = '%', label = paste("Recuperados. Totales"),gaugeSectors(
+      success = c(100, 46), warning = c(45,13), danger = c(0, 12), colors = c("#9DC3C2")
+    ))
+    
+  })
+  
   ###########
   #
   # DATOS GLOBALES
   #
   ###########
-  
+  output$gaugePlot <- renderGauge({
+    gauge(50)
+  })
   ###########
   #
   # DATOS de ESPAÑA

@@ -19,6 +19,7 @@ library(mice)
 library(shiny.router)
 library(shiny.i18n)
 library (shinyWidgets)
+library(flexdashboard)
 
 directorio <- getwd()
 cat(file=stdout()," Este es el drectorio:",directorio)

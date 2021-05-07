@@ -73,8 +73,7 @@ download_GlobalFiles <- function () {
 }
 
 ####################
-## Cargamos los ficheros csv que contienen los datos a nivel internacional
-## Ficheros OMS:
+##  Coprobamos si tenemos los ficheros de este dñia, Si no lso tenemos lso descargamos y ks creamos
 #
 # globalDataOMS_<DATA>.csv
 # 
@@ -105,6 +104,10 @@ load_Data <- function (input, output,session) {
     
     return ( "Datos Actualizados")
 }
+#############################
+## Funciones de extracciónd de información del COVID-19 a partir de lso ficheros csv.
+############################
+
 
 #####################################################################
 #Descargamos los datos y grabamos en el directorio de datos de la APP
@@ -253,7 +256,7 @@ donwload_scrapingWorldometers <- function (input, output,session) {
       # Increment the progress bar, and update the detail text.
       incProgress(0.1, detail = paste("part", STANDBY_TIME))
       
-      # Recopil la tabla que muestra en tiempo real los datos de COVID al recdedor del mundo 
+      #  pasamos a valores numéricos
       my_table[]<-lapply(my_table, function(x) (gsub("\\,|\\+", "", (x))))
       
       # Increment the progress bar, and update the detail text.
@@ -275,6 +278,7 @@ donwload_scrapingWorldometers <- function (input, output,session) {
       names(world)[2] <- 'world'
       contry    <-  my_table[9:230,]  
       names(contry)[2] <- 'contry'
+      world$Population <- sum(as.numeric(contry$Population), na.rm = TRUE)
       
       incProgress(0.5)
       if (is.function(updateProgress)) {

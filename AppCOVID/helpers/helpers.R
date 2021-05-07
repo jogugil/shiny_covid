@@ -133,3 +133,13 @@ list_images_html <- function (list_src){
   html
   
 }
+
+###################
+##  Gauge Witget
+##
+##################
+myGauge <- function(id, label, value) { 
+  tagList( tags$label( `for` = id, label ), 
+           tags$meter( id = id, value = value ) 
+  ) 
+}
