@@ -9,7 +9,7 @@ body_reco <- mainPanel (
     tags$style(type = "text/css", "@media (max-width: 991px) { .details .summary { order: 3; width: 100%; } }"),
     tags$style(type = "text/css", "@media (max-width: 991px) { .details .slider { order: 2; width: 100%; } }")
   ),
-   fluidRow(  
+  fluidRow(  
             #Cargamos las recomendaciones de la OMS sobre el COVID.
             #Se cargan los ficheros png descargados de su web 
              

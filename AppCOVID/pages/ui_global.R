@@ -10,12 +10,12 @@ body_global <- mainPanel(
   ),
   fluidRow(
     fluidRow(
-      uiOutput("box_keyFigures")
+      #uiOutput("box_keyFigures")
     ),
     fluidRow(
-      column(4,flexdashboard::gaugeOutput("casosCoronaWorld")),    
-      column(4,flexdashboard::gaugeOutput("casosFallecidosWorld") ), 
-      column(4,flexdashboard::gaugeOutput("casosRecuperadosWorld")) , 
+      column(4,valueBoxOutput("casosCoronaWorld")),    
+      column(4,valueBoxOutput("casosFallecidosWorld")), 
+      column(4,valueBoxOutput("casosRecuperadosWorld")) , 
     ),fluidRow(
       column(6,box( title = "Casos Activos", status = "primary", solidHeader = TRUE,
                     collapsible = TRUE,hr(),div(verbatimTextOutput("textActiveCase")))),    
@@ -28,7 +28,8 @@ body_global <- mainPanel(
       column(
         box(
           width = 12,
-          leafletOutput("global_map1")
+          #leafletOutput("global_map1"),
+          verbatimTextOutput("TextDataGlobalUpdate")
         ),
         class = "map",
         width = 8,
@@ -44,9 +45,9 @@ body_global <- mainPanel(
         sliderInput(
           "timeSlider",
           label      = "Select date",
-          min        = 1,#min(data_evolution$date),
-          max        = 123456789,#max(data_evolution$date),
-          value      = 12,#max(data_evolution$date),
+          min        = min(data_evolution$date),
+          max        = max(data_evolution$date),
+          value      = max(data_evolution$date),
           width      = "100%",
           timeFormat = "%d.%m.%Y",
           animate    = animationOptions(loop = TRUE)

@@ -150,7 +150,7 @@ body <- dashboardBody(
           fluidRow( tabPanel(i18n$t("Recomendaciones de la OMS sobre el COVID 19") ,page_reco, value = "page_reco") ),
         ),
         tabItem( tabName = "globalDataUpdate", 
-                 p(i18n$t("Actualizando lo´s datos Globales!!!!!")) ,
+                 p(i18n$t("Actualizando los datos Globales!!!!!")) ,
                  h3(verbatimTextOutput("TextDataGlobalUpdate"))
         ),
         tabItem(  tabName = "spanhisDataUpdate",

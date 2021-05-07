@@ -68,7 +68,18 @@
     {
       "es": "Recomendaciones de la OMS sobre el COVID 19",
       "en": "OMS recommendations on COVID 19"
-    }
-
+    },
+    {
+      "es": "Casos Totales",
+      "en": "Total Case"
+    },
+      {
+        "es": "Fallecidos Totales",
+        "en": "Total Deceased"
+      },
+      {
+        "es": "Recuperados Totales",
+        "en": "Total Recovered"
+      }
   ]
 }

@@ -9,6 +9,7 @@ La aplicación se desarrolla como un proyecto de la asignatura de Visualización
 <li> Los datos sobre el estado de la pandemia en todo el mundo se recopilan en el sitio web de la OMS y de la comunidad europea:
 <ul> <li type="circle"> Datos de la OMS:Tanto de sus <a href="https://covid19.who.int/">páginas web</a> como del <a href="https://covid19.who.int/WHO-COVID-19-global-table-data.csv"> fichero csv </a>que mantienen actualizado en abierto para descarga </li></ul>	
 <ul> <li type="circle"> Datos de  worldometers :    En su <a href='https://www.worldometers.info/coronavirus/'>web</a> nos presenta datos en tiempo real por país de la situación actual de pandemia. Nos complementa los datos de incidencia acumulados que nos da la OMS. </li></ul>	
+ul> <li type="circle"> Datos de  seriestemporales de la evolución del COVID:    En su <a href='https://data.humdata.org/dataset/novel-coronavirus-2019-ncov-cases'>web</a>  DAtos compilados por  Johns Hopkins University Center for Systems Science and Engineering (JHU CCSE) . </li></ul>	
 
 </li>
 <li>

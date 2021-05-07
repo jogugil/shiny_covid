@@ -15,15 +15,15 @@ addLabel <- function(data) {
                         </table>'
                   )
   } else  {
-        label <- paste0(
-                        ' 
-                        <table style="width:120px;">
-                        <tr><td>Actived Case:</td><td align="right">', data$ActiveCases, '</td></tr>
-                        <tr><td>Critcal Case :</td><td align="right">', data$CritcalCase , '</td></tr>
-                        <tr><td>Estimated Recoveries:</td><td align="right">', data$TotalRecovered, '</td></tr>
-                        <tr><td>Population :</td><td align="right">', data$Population , '</td></tr>
-                        </table>'
-                  )
+        label <-  paste0(
+                  '<b>', ifelse(is.na(data$`Province/State`), data$`Country/Region`, data$`Province/State`), '</b><br>
+                  <table style="width:120px;">
+                  <tr><td>Confirmed:</td><td align="right">', data$confirmed, '</td></tr>
+                  <tr><td>Deceased:</td><td align="right">', data$deceased, '</td></tr>
+                  <tr><td>Estimated Recoveries:</td><td align="right">', data$recovered, '</td></tr>
+                  <tr><td>Active:</td><td align="right">', data$active, '</td></tr>
+                  </table>'
+        )
   }
   data$label <- label
   data$label <- lapply(data$label, HTML)
