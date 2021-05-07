@@ -21,6 +21,13 @@ library(shiny.i18n)
 library (shinyWidgets)
 library(flexdashboard)
 
+source("./pages/ui_global.R", local = TRUE)
+source("./pages/ui_sp.R", local = TRUE)
+source("./pages/ui_cv.R", local = TRUE)
+source("./pages/ui_rec.R", local = TRUE)
+ 
+
+
 directorio <- getwd()
 cat(file=stdout()," Este es el drectorio:",directorio)
  
@@ -110,10 +117,10 @@ body <- dashboardBody(
             tabName = "globalData",
             navbarPage(
               i18n$t('Datos Globales'),
-              tabPanel("Resumen"),
-              tabPanel("Por país")
+              tabPanel("Resumen" ),
+              tabPanel("Por país" )
             ),
-             source("./pages/covidGlobal.R"), 
+            fluidRow( tabPanel(i18n$t("Recomendaciones de la OMS sobre el COVID 19") ,page_global, value = "page_global") ) 
         ),
         tabItem(
           style="overflow-y: auto;",
@@ -140,7 +147,7 @@ body <- dashboardBody(
         ),tabItem(
           style="overflow-y: auto;",
           tabName = "recomendacionesOMS",
-          eval(source("./pages/covidRec.R")), 
+          fluidRow( tabPanel(i18n$t("Recomendaciones de la OMS sobre el COVID 19") ,page_reco, value = "page_reco") ),
         ),
         tabItem( tabName = "globalDataUpdate", 
                  p(i18n$t("Actualizando lo´s datos Globales!!!!!")) ,

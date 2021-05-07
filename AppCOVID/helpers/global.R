@@ -382,7 +382,7 @@ load_filesRecomOMS<- function (input, output,session) {
       title <- files[i] %>% sub (patron,"",.)%>% str_trim(.)
       label <- paste("R",i," ")
       label <- str_trim(label)
-      tabPanel(title = label,h1(gsub("_"," ",title)), fluidRow(tags$img(src = files [i],width=250)))
+      tabPanel(title = label,width=650,h3(gsub("_"," ",title)), fluidRow(tags$img(src = files [i],width=350)))
     })
     if(is.null(mytabs)) {
       mytabs <- tabPanel(title = 'R 0', fluidRow(h3("No existen recomendaciones de la OMS.")))

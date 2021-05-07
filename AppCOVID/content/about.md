@@ -20,7 +20,7 @@ Para el desarrollo de la aplicación, el grupo de trabajo ha utilizado diferente
 En concreto, se han utilizado:
 
 
-### Cambios de datos
+### Tratamiento de datos
 
 Debido a la actual situación de pandemia en la que vivimos, los informes y los datos están sujetos a cambios diarios. En concreto, los datos de seguimiento de la situación de pandemia, vacunación y alarma se actualizarán diariamente según los datos proporcionados por nuestras fuentes de datos.
 Esto afectará:

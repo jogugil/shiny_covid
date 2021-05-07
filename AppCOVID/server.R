@@ -15,7 +15,11 @@ library(shinydashboard)
 source("./helpers/global.R") 
 source("./helpers/helpers.R")
 
-
+library(shiny)
+library(leaflet)
+library(RColorBrewer)
+library(xts)
+library(rgdal)
 
 glUpdateMesaje <- ""
 # Define server logic required to draw a histogram
@@ -140,7 +144,7 @@ shinyServer(function(input, output,session) {
  output$tabsBoxRecomendaOMS <- renderUI({
     mytabs <- load_filesRecomOMS ()
     if(!is.null(mytabs)) {
-      do.call(tabBox, args = c(width = 350,title="Recomendaciones de la OMS sobre el COVID 19", mytabs))
+      do.call(tabBox, args = c(width = 1024, mytabs))
     } else {
       box(h3("No existen recomendaiones de la OMS en estos momentos."))
     }
