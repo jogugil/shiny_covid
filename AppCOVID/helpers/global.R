@@ -31,12 +31,12 @@ df$img <- lapply (1:length(df$val),function (i) {
                                 })
  
 ####################################################################
-#  Mamipulación de datos globales #################################
+#  Manipulación de datos globales #################################
 ###################################################################
 ##############
 #
 # Crea y descarga los ficheros CSV de datos  del virus
-###############3
+###############
 
 download_GlobalFiles <- function () {
   url_CSVOMS <- "https://covid19.who.int/WHO-COVID-19-global-table-data.csv"
@@ -95,6 +95,7 @@ load_Data <- function (input, output,session) {
     wldometer_Continent <- sprintf("%s/worldometersWorld_%s.csv",PATH_DATA,nowdate)
     omsGlobal           <- sprintf("%s/globalDataOMS_%s.csv",PATH_DATA,nowdate)
     
+    # --123-- FALTA ACTUALIZAR LOS DATOS DE ESPAÑA Y LOS DATOS COMUNIDAD VALENCIANA
     if(!file.exists(omsGlobal)) {
       download_filesCSVOMS (input, output,session)
     } 

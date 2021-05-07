@@ -4,37 +4,56 @@ tabItem(
            tabPanel("Resumen",  
                 sidebarLayout(
                   sidebarPanel( 
-                                         
-                                               # A static infoBox
-                    fluidRow(   infoBox("Casos", 10 * 2, icon = icon("credit-card"))),
-                                               
-                                        
-                                         
-                                               # A static infoBox
-                                fluidRow(    valueBox(10 * 2, "New Orders", icon = icon("credit-card"))),
-                                               
-                                         
-                                       
-                                               # A static infoBox
-                                             fluidRow( infoBox("Recuperados", 10 * 2, icon = icon("world"))),
-                                               
-                                         
-                                   
-                      ),
-                      mainPanel( 
-                          fluidRow(
-                                    column(width=4,
-                                            box(title = "Casos Abiertos", status = "primary", solidHeader = TRUE,
-                                                collapsible = TRUE)  
-                                    ),
-                                    column(width=4,
-                                            box(title = "Casos Cerrados", status = "primary", solidHeader = TRUE,
-                                                collapsible = TRUE,)    
-                                    ),
-                            )
-                      )
+                    
+                  ),
+                  mainPanel( 
+                    tags$head(tags$style(HTML('.info-box {min-height: 45px;} .info-box-icon 
+{height: 45px; line-height: 45px;} .info-box-content {padding-top: 0px; 
+padding-bottom: 0px;} 
+                          '))),
+                    fluidRow(
+                      column(1,
+                             selectInput("Position", "", 
+                                         c("User_Analyses","User_Activity_Analyses"),selected = "Median", width = 
+                                           "400"),
+                             conditionalPanel(
+                               condition = "input.Position == 'User_Analyses'",
+                               selectInput("stats", "", c("Time","Cases"),selected = "Median", width = 
+                                             "400"))),
+                      tags$br(),
+                      column(10,
+                             infoBox("User1", paste0(10), icon = icon("credit-card"), width = "3"),
+                             infoBox("User2",paste0(10), icon = icon("credit-card"), width = 
+                                       "3"),
+                             
+                             infoBox("User3",paste0(10), icon = icon("credit-card"), width = 
+                                       "3"),
+                             infoBox("User4",paste0(16), icon = icon("credit-card"), width = 
+                                       "3")),
+                      
+                      
+                      column(10,
+                             conditionalPanel(
+                               condition = "input.Position == 'User_Analyses'",
+                               
+                               box(title = "Plot1", status = "primary",height = "537" ,solidHeader = T,
+                                   plotOutput("case_hist",height = "466")),
+                               box(title = "Plot2", status = "primary",height = "537" ,solidHeader = T,
+                                   plotOutput("trace_hist",height = "466"))
+                               
+                               
+                             ),
+                             conditionalPanel(
+                               condition = "input.Position == 'User_Activity_Analyses'",
+                               box(title = "Plot3",status = "primary",solidHeader = T,height = "537",width = "6",
+                                   plotOutput("sankey_plot")),
+                               box(title = "Plot4",status = "primary",solidHeader = T,height = "537",width = "6",
+                                   plotOutput("sankey_table"))
+                               
+                             )
+                        )
                 )
-           ), 
+           ))), 
            tabPanel("Por País",  
            )
     )  
