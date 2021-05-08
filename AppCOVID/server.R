@@ -88,14 +88,13 @@ shinyServer(function(input, output,session) {
   # Contenido dinámico a traducir
   ###########
   globalUpdate_var <- reactive ({
+      
       load_Data (input, output,session)
      
   })
   output$globalUpdate <- renderText({i18n$t(globalUpdate_var()) })
   
-  ###################################
-  ### VISUALIZACIÓN DE DATOS#########
-  ###################################
+ 
   ############
   ## Actualizamos los datos al entrar a la app
   #######
@@ -291,13 +290,20 @@ shinyServer(function(input, output,session) {
   # DATOS de ESPAÑA
   #
   ###########
-  
-  ###########
-  #
-  # DATOS de la COmunidad Valenciana
-  #
-  ###########
-  
+  output$tbl=DT::renderDataTable(casos_cv)
+  output$grafico_1<-renderPlot({casos_cv %>%  group_by(fecha) %>%  summarise( sum = sum(num_casos)) %>%
+      ggplot() + aes(y=sum,x=fecha) + geom_col()+ xlab("Fecha") + ylab("Casos") +
+      ggtitle("Casos en España por fecha") + theme(plot.title = element_text(hjust = 0.5))})
+  output$grafico_2<-renderPlot({casos_cv %>%  group_by(ccaa_iso) %>%  summarise( sum = sum(num_casos)) %>%
+      ggplot() + aes(y=sum,x=ccaa_iso,fill=ccaa_iso) + geom_col()+ xlab("Comunidades") + ylab("casos") +
+      ggtitle("Casos totales por Comunidad") + theme(plot.title = element_text(hjust = 0.5))})
+  output$grafico_3<-renderPlot({casos_cv %>%  group_by(fecha) %>%  summarise( sum = sum(num_casos_prueba_pcr)) %>%
+      ggplot() + aes(y=sum,x=fecha) + geom_col()+ xlab("Fecha") + ylab("PCR realizadas") +
+      ggtitle("Tests PCR realizados en España por fecha") + theme(plot.title = element_text(hjust = 0.5))})
+  output$grafico_4<-renderPlot({casos_cv %>%  group_by(ccaa_iso) %>%  summarise( sum = sum(num_casos_prueba_pcr)) %>%
+      ggplot() + aes(y=sum,x=ccaa_iso,fill=ccaa_iso) + geom_col()+ xlab("Comunidades") + ylab("PCR realizadas") +
+      ggtitle("Test PCR totales realizados por cada comunidad") + theme(plot.title = element_text(hjust = 0.5))})
+   
   ###########
   #
   # RECOMENDACIONES DE LA OMS (CARGAMOS LOS POSTERS almacenados en local y bajados desde su web)

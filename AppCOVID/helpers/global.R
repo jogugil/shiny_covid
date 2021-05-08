@@ -287,7 +287,11 @@ load_Data <- function (input, output,session) {
 
 download_filesCSVOMS <- function (input, output,session) {
     url_CSVOMS <- "https://covid19.who.int/WHO-COVID-19-global-table-data.csv"
-    style <- isolate(input$style)
+    
+    
+    style <- "overflow-y: auto;"
+    if(!is.null(input$style))
+      style <- isolate(input$style)
     
     # Create a Progress object
     progress <- shiny::Progress$new(style = style)
