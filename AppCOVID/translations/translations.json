@@ -73,13 +73,29 @@
       "es": "Casos Totales",
       "en": "Total Case"
     },
-      {
-        "es": "Fallecidos Totales",
-        "en": "Total Deceased"
-      },
-      {
-        "es": "Recuperados Totales",
-        "en": "Total Recovered"
-      }
+    {
+      "es": "Fallecidos Totales",
+      "en": "Total Deceased"
+    },
+    {
+      "es": "Recuperados Totales",
+      "en": "Total Recovered"
+    },
+    {
+      "es": "Confirmados",
+      "en": "Confirmed"
+    },
+    {
+      "es": "Fallecidos",
+      "en": "Deceased"
+    },
+    {
+      "es": "Recuperados",
+      "en": "Estimated Recoveries"
+    },
+    {
+      "es": "Activos",
+      "en": "Active"
+    }
   ]
 }

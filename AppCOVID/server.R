@@ -14,15 +14,13 @@ library(shiny)
 library(shinydashboard)
 source("./helpers/global.R") 
 source("./helpers/helpers.R")
-
+source("./pages/map.R")
 library(shiny)
 library(leaflet)
 library(RColorBrewer)
 library(xts)
 library(rgdal)
-
-
-source("./pages/map1.R", local = TRUE)
+library(DT)
  
  
   
@@ -81,20 +79,19 @@ shinyServer(function(input, output,session) {
   # Internacionalización
   #######################
   observeEvent(input$selected_language, {
+    req(input$selected_language)
     update_lang(session, input$selected_language)
     globalUpdate_var()
   })
   #############
   ##
-  # Con tenido dinámico a traducir
+  # Contenido dinámico a traducir
   ###########
   globalUpdate_var <- reactive ({
-      tt <- load_Data (input, output,session)
-      print(tt)
-      tt
+      load_Data (input, output,session)
      
   })
-  output$globalUpdate <- renderText({ i18n$t(globalUpdate_var()) })
+  output$globalUpdate <- renderText({i18n$t(globalUpdate_var()) })
   
   ###################################
   ### VISUALIZACIÓN DE DATOS#########
@@ -102,16 +99,193 @@ shinyServer(function(input, output,session) {
   ############
   ## Actualizamos los datos al entrar a la app
   #######
- 
+  output$casosCoronaWorld <- renderValueBox({
+    req(global_COvidDataWDMeterWorld)
+    case <- global_COvidDataWDMeterWorld$TotalCases
+     paste(case,i18n$t("Casos Totales"),sep="")
+  })
+  output$casosFallecidosWorld <- renderValueBox({
+    req(global_COvidDataWDMeterWorld)
+    case <- global_COvidDataWDMeterWorld$TotalDeaths
+    paste(case,i18n$t("Fallecidos Totales"),case,sep="")
+  })
+  output$casosRecuperadosWorld <- renderValueBox({
+    req(global_COvidDataWDMeterWorld)
+    case <- global_COvidDataWDMeterWorld$TotalRecovered
+    paste(case,i18n$t("Recuperados Totales"),case,sep="")
+  })
   
   ###########
   #
   # DATOS GLOBALES
   #
   ###########
-  output$gaugePlot <- renderGauge({
-    gauge(50)
+  #################################
+  ###
+  ## MApa Global con la serie de tiempo
+  ####################################
+  #Creamos el mapa con la serie temporal de evolución de la pandemia en el mundo.
+  output$overview_map <- renderLeaflet(map)
+  
+  
+  #Datos de seguimiento de la pandemia
+  output$box_keyFigures <- renderUI(box(
+    title = paste0("Key Figures (", strftime(input$timeSlider, format = "%d.%m.%Y"), ")"),
+    fluidRow(
+      column(
+        valueBoxOutput("valueBox_confirmed", width = 3),
+        valueBoxOutput("valueBox_recovered", width = 3),
+        valueBoxOutput("valueBox_deceased", width = 3),
+        valueBoxOutput("valueBox_countries", width = 3),
+        width = 12,
+        style = "margin-left: -20px"
+      )
+    ),
+    div("Last updated: ", strftime(changed_date, format = "%d.%m.%Y - %R %Z")),
+    width = 12
+  ))
+  key_figures <- reactive({
+    data           <- sumData(input$timeSlider)
+    data_yesterday <- sumData(input$timeSlider - 1)
+    
+    data_new <- list(
+      new_confirmed = (data$confirmed - data_yesterday$confirmed) / data_yesterday$confirmed * 100,
+      new_recovered = (data$recovered - data_yesterday$recovered) / data_yesterday$recovered * 100,
+      new_deceased  = (data$deceased - data_yesterday$deceased) / data_yesterday$deceased * 100,
+      new_countries = data$countries - data_yesterday$countries
+    )
+    
+    keyFigures <- list(
+      "confirmed" = HTML(paste(format(data$confirmed, big.mark = " "), sprintf("<h4>(%+.1f %%)</h4>", data_new$new_confirmed))),
+      "recovered" = HTML(paste(format(data$recovered, big.mark = " "), sprintf("<h4>(%+.1f %%)</h4>", data_new$new_recovered))),
+      "deceased"  = HTML(paste(format(data$deceased, big.mark = " "), sprintf("<h4>(%+.1f %%)</h4>", data_new$new_deceased))),
+      "countries" = HTML(paste(format(data$countries, big.mark = " "), "/ 195", sprintf("<h4>(%+d)</h4>", data_new$new_countries)))
+    )
+    return(keyFigures)
   })
+  
+  output$valueBox_confirmed <- renderValueBox({
+    shinydashboard::valueBox(
+      key_figures()$confirmed,
+      subtitle = "Confirmed",
+      icon     = icon("file-medical"),
+      color    = "light-blue",
+      width    = NULL
+    )
+  })
+  
+  
+  output$valueBox_recovered <- renderValueBox({
+    shinydashboard::valueBox(
+      key_figures()$recovered,
+      subtitle = "Estimated Recoveries",
+      icon     = icon("heart"),
+      color    = "light-blue"
+    )
+  })
+  
+  output$valueBox_deceased <- renderValueBox({
+    shinydashboard::valueBox(
+      key_figures()$deceased,
+      subtitle = "Deceased",
+      icon     = icon("heartbeat"),
+      color    = "light-blue"
+    )
+  })
+  
+  output$valueBox_countries <- renderValueBox({
+    shinydashboard::valueBox(
+      key_figures()$countries,
+      subtitle = "Affected Countries",
+      icon     = icon("flag"),
+      color    = "light-blue"
+    )
+  })
+  
+  
+  output$summaryTables <- renderUI({
+    tabBox(
+      tabPanel("Country/Region",
+               div(
+                 dataTableOutput("summaryDT_country"),
+                 style = "margin-top: -10px")
+      ),
+      tabPanel("Province/State",
+               div(
+                 dataTableOutput("summaryDT_state"),
+                 style = "margin-top: -10px"
+               )
+      ),
+      width = 12
+    )
+  })
+  
+  output$summaryDT_country <- renderDataTable(getSummaryDT(data_atDate(current_date), "Country/Region", selectable = TRUE))
+  proxy_summaryDT_country  <- dataTableProxy("summaryDT_country")
+  output$summaryDT_state   <- renderDataTable(getSummaryDT(data_atDate(current_date), "Province/State", selectable = TRUE))
+  proxy_summaryDT_state    <- dataTableProxy("summaryDT_state")
+  
+  observeEvent(input$timeSlider, {
+    data <- data_atDate(input$timeSlider)
+    replaceData(proxy_summaryDT_country, summariseData(data, "Country/Region"), rownames = FALSE)
+    replaceData(proxy_summaryDT_state, summariseData(data, "Province/State"), rownames = FALSE)
+  }, ignoreInit = TRUE, ignoreNULL = TRUE)
+  
+  observeEvent(input$summaryDT_country_row_last_clicked, {
+    selectedRow     <- input$summaryDT_country_row_last_clicked
+    selectedCountry <- summariseData(data_atDate(input$timeSlider), "Country/Region")[selectedRow, "Country/Region"]
+    location        <- data_evolution %>%
+      distinct(`Country/Region`, Lat, Long) %>%
+      filter(`Country/Region` == selectedCountry) %>%
+      summarise(
+        Lat  = mean(Lat),
+        Long = mean(Long)
+      )
+    leafletProxy("overview_map") %>%
+      setView(lng = location$Long, lat = location$Lat, zoom = 4)
+  })
+  
+  observeEvent(input$summaryDT_state_row_last_clicked, {
+    selectedRow     <- input$summaryDT_state_row_last_clicked
+    selectedCountry <- summariseData(data_atDate(input$timeSlider), "Province/State")[selectedRow, "Province/State"]
+    location <- data_evolution %>%
+      distinct(`Province/State`, Lat, Long) %>%
+      filter(`Province/State` == selectedCountry) %>%
+      summarise(
+        Lat  = mean(Lat),
+        Long = mean(Long)
+      )
+    leafletProxy("overview_map") %>%
+      setView(lng = location$Long, lat = location$Lat, zoom = 4)
+  })
+  
+  summariseData <- function(df, groupBy) {
+    df %>%
+      group_by(!!sym(groupBy)) %>%
+      summarise(
+        "Confirmed"            = sum(confirmed, na.rm = T),
+        "Estimated Recoveries" = sum(recovered, na.rm = T),
+        "Deceased"             = sum(deceased, na.rm = T),
+        "Active"               = sum(active, na.rm = T)
+      ) %>%
+      as.data.frame()
+  }
+  
+  getSummaryDT <- function(data, groupBy, selectable = FALSE) {
+    datatable(
+      na.omit(summariseData(data, groupBy)),
+      rownames  = FALSE,
+      options   = list(
+        order          = list(1, "desc"),
+        scrollX        = TRUE,
+        scrollY        = "37vh",
+        scrollCollapse = T,
+        dom            = 'ft',
+        paging         = FALSE
+      ),
+      selection = ifelse(selectable, "single", "none")
+    )
+  }
   ###########
   #
   # DATOS de ESPAÑA
@@ -131,6 +305,7 @@ shinyServer(function(input, output,session) {
   ###########
   
  output$tabsBoxRecomendaOMS <- renderUI({
+ 
     mytabs <- load_filesRecomOMS ()
     if(!is.null(mytabs)) {
       do.call(tabBox, args = c(width = 1024, mytabs))
@@ -150,11 +325,7 @@ shinyServer(function(input, output,session) {
    ###############
   # Descarga y actualiza los datos a Nivel Nacional sobre el COVID-19
   ##############
-  
-  ###############
-  # Descarga y actualiza los datos de la Comunidad Valenciana sobre el COVID-19
-  ##############
-  
+   
   ###############
   #Descarga las recomendaciones de la OMS sobre el COVID-19
   ###############
@@ -310,5 +481,6 @@ shinyServer(function(input, output,session) {
       labs(title=isolate({input$titulo}),
            x="Tiempo de espera hasta la próxima erupción (minutos)")
   })
-     
+  
+
 })

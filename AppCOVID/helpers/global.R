@@ -5,10 +5,10 @@ library(shiny)
 library(shinydashboard)
 library(tidyverse)
 library(rvest)
-library ("sf")
-library("wbstats")
-library("raster")
-library("leaflet")
+library (sf)
+library(wbstats)
+
+library(leaflet)
 source("./helpers/helpers.R")
 
 DEBUG <- TRUE
@@ -46,7 +46,8 @@ wldometer_World     <- sprintf("%s/worldometersWorld_%s.csv",PATH_DATA,nowdate)
 wldometer_Country   <- sprintf("%s/worldometersCountry_%s.csv",PATH_DATA,nowdate)
 wldometer_Continent <- sprintf("%s/worldometersContinent_%s.csv",PATH_DATA,nowdate)
 omsGlobal           <- sprintf("%s/globalDataOMS_%s.csv",PATH_DATA,nowdate)
-
+if(!file.exists(wldometer_World))
+  load_Data()
  
 global_COvidDataOMS               <- read.csv(omsGlobal)
 global_COvidDataWDMeterWorld      <- read.csv(wldometer_World)
@@ -62,7 +63,10 @@ data_deceased     <- read_csv("./data/time_series_covid19_deaths_global.csv")
 data_recovered    <- read_csv("./data/time_series_covid19_recovered_global.csv")
 
 #Cargamos los datos de serie temporal por país (Obtenemos la evolución del virus por país)
- 
+
+changed_date <-  Sys.Date()
+current_date <-  Sys.Date()
+# Get evolution data by country
 data_confirmed_sub <- data_confirmed %>%
   pivot_longer(names_to = "date", cols = 5:ncol(data_confirmed)) %>%
   group_by(`Province/State`, `Country/Region`, date, Lat, Long) %>%
@@ -78,10 +82,9 @@ data_deceased_sub <- data_deceased %>%
   group_by(`Province/State`, `Country/Region`, date, Lat, Long) %>%
   summarise("deceased" = sum(value, na.rm = T))
 
-
 data_evolution <- data_confirmed_sub %>%
   full_join(data_recovered_sub) %>%
-  rbind(data_deceased_sub) %>%
+  full_join(data_deceased_sub) %>%
   ungroup() %>%
   mutate(date = as.Date(date, "%m/%d/%y")) %>%
   arrange(date) %>%
@@ -94,29 +97,55 @@ data_evolution <- data_confirmed_sub %>%
     recovered     = coalesce(recovered, recovered_est),
     active        = confirmed - recovered - deceased
   ) %>%
-  dplyr::select(-recovered_est) %>%
+  select(-recovered_est) %>%
   pivot_longer(names_to = "var", cols = c(confirmed, recovered, deceased, active)) %>%
   filter(!(is.na(`Province/State`) && `Country/Region` == "US")) %>%
   filter(!(Lat == 0 & Long == 0)) %>%
   ungroup()
 
-
-
-# Calculamos la evolución del virus y eliminamos los datos que no necesitamos
+# Calculating new cases
 data_evolution <- data_evolution %>%
   group_by(`Province/State`, `Country/Region`) %>%
   mutate(value_new = value - lag(value, 4, default = 0)) %>%
   ungroup()
 
+ 
 #Eliminamos los datos que ya no nos sirven
 rm(data_confirmed, data_confirmed_sub, data_recovered, data_recovered_sub, data_deceased, data_deceased_sub)
+population                                                            <- wb_data(country = "countries_only", indicator = "SP.POP.TOTL", start_date = 2019, end_date = 2021) %>%
+  select(country, SP.POP.TOTL) %>%
+  rename(population = SP.POP.TOTL)
+countryNamesPop                                                       <- c("Brunei Darussalam", "Congo, Dem. Rep.", "Congo, Rep.", "Czech Republic",
+                                                                           "Egypt, Arab Rep.", "Iran, Islamic Rep.", "Korea, Rep.", "St. Lucia", "West Bank and Gaza", "Russian Federation",
+                                                                           "Slovak Republic", "United States", "St. Vincent and the Grenadines", "Venezuela, RB")
+countryNamesDat                                                       <- c("Brunei", "Congo (Kinshasa)", "Congo (Brazzaville)", "Czechia", "Egypt", "Iran", "Korea, South",
+                                                                           "Saint Lucia", "occupied Palestinian territory", "Russia", "Slovakia", "US", "Saint Vincent and the Grenadines", "Venezuela")
+population <- na.omit(population)
+population[which(population$country %in% countryNamesPop), "country"] <- countryNamesDat
+
+
+# Data from wikipedia
+noDataCountries <- data.frame(
+  country    = c("Cruise Ship", "Guadeloupe", "Guernsey", "Holy See", "Jersey", "Martinique", "Reunion", "Taiwan*"),
+  population = c(3700, 395700, 63026, 800, 106800, 376480, 859959, 23780452)
+)
+population      <- bind_rows(population, noDataCountries)
+
+data_evolution <- data_evolution %>%
+  left_join(population, by = c("Country/Region" = "country"))
+rm(population, countryNamesPop, countryNamesDat, noDataCountries)
 
 data_atDate <- function(inputDate) {
   data_evolution[which(data_evolution$date == inputDate),] %>%
-    distinct()  %>%
-    filter(var > 0 ) %>%
-    pivot_wider(id_cols = c("Province/State", "Country/Region", "date", "Lat", "Long"), names_from = var, values_from = value)
+    distinct() %>%
+    pivot_wider(id_cols = c("Province/State", "Country/Region", "date", "Lat", "Long", "population"), names_from = var, values_from = value) %>%
+    filter(confirmed > 0 |
+             recovered > 0 |
+             deceased > 0 |
+             active > 0)
 }
+
+
 last_date <- max(data_evolution$date)
 data_latest <- data_atDate(last_date)
 
@@ -130,7 +159,18 @@ top5_countries <- data_evolution %>%
   dplyr::select(`Country/Region`) %>%
   pull()
 
-
+sumData <- function(date) {
+  if (date >= min(data_evolution$date)) {
+    data <- data_atDate(date) %>% dplyr::summarise(
+      confirmed = sum(confirmed, na.rm = T),
+      recovered = sum(recovered, na.rm = T),
+      deceased  = sum(deceased, na.rm = T),
+      countries = n_distinct(`Country/Region`)
+    )
+    return(data)
+  }
+  return(NULL)
+}
 ####################################################################
 #  Manipulación de datos globales #################################
 ###################################################################
@@ -189,8 +229,12 @@ download_GlobalFiles <- function () {
  
 load_Data <- function (input, output,session) {
   
-    
-    # --123-- FALTA ACTUALIZAR LOS DATOS DE ESPAÑA Y LOS DATOS COMUNIDAD VALENCIANA
+  wldometer_World     <- sprintf("%s/worldometersWorld_%s.csv",PATH_DATA,nowdate)
+  wldometer_Country   <- sprintf("%s/worldometersCountry_%s.csv",PATH_DATA,nowdate)
+  wldometer_Continent <- sprintf("%s/worldometersContinent_%s.csv",PATH_DATA,nowdate)
+  omsGlobal           <- sprintf("%s/globalDataOMS_%s.csv",PATH_DATA,nowdate)
+  
+    # --123-- FALTA ACTUALIZAR LOS DATOS DE ESPAÑA  
     if(!file.exists(omsGlobal)) {
       download_filesCSVOMS (input, output,session)
     } 
@@ -201,23 +245,16 @@ load_Data <- function (input, output,session) {
     # worldometersContinent_<DATA>.csv
     # worldometersCountry_<DATA>.csv
     # worldometersWorld_<DATA>.csv
-    printApp("Cargamos los ficheros de datos en menoria.")
-    
-    #sp_COvidData            <- data.frame()
-    #cv_COvidData            <- data.frame()
-    print(wldometer_Country)
-    print(wldometer_World)
-    print(wldometer_Continent)
-    
-
-   
  
+    global_COvidDataOMS               <- read.csv(omsGlobal)
+    global_COvidDataWDMeterWorld      <- read.csv(wldometer_World)
+    global_COvidDataWDMeterCountry    <- read.csv(wldometer_Country)
+    global_COvidDataWDMeterContinent  <- read.csv(wldometer_Continent)
+
     
     return ( "Datos Actualizados")
 }
-#############################
-## Funciones de extracciónd de información del COVID-19 a partir de lso ficheros csv.
-############################
+ 
 
 
 #####################################################################

@@ -1,8 +1,9 @@
 body_global <- mainPanel(
+  #Añado los colores y el tamaño de los objetos a mostrar
   tags$head(
-    tags$style(type = "text/css", "#overview_map {height: 50vh !important;}"),
-    tags$style(type = 'text/css', ".slider-animate-button { font-size: 20pt !important; }"),
-    tags$style(type = 'text/css', ".slider-animate-container { text-align: left !important; }"),
+    tags$style(type = "text/css", "#global_map {height: 50vh }"),
+    tags$style(type = 'text/css', ".slider-animate-button { font-size: 10pt  }"),
+    tags$style(type = 'text/css', ".slider-animate-container { text-align: left  }"),
     tags$style(type = "text/css", "@media (max-width: 991px) { .details { display: flex; flex-direction: column; } }"),
     tags$style(type = "text/css", "@media (max-width: 991px) { .details .map { order: 1; width: 100%; } }"),
     tags$style(type = "text/css", "@media (max-width: 991px) { .details .summary { order: 3; width: 100%; } }"),
@@ -10,33 +11,21 @@ body_global <- mainPanel(
   ),
   fluidRow(
     fluidRow(
-      #uiOutput("box_keyFigures")
-    ),
-    fluidRow(
-      column(4,valueBoxOutput("casosCoronaWorld")),    
-      column(4,valueBoxOutput("casosFallecidosWorld")), 
-      column(4,valueBoxOutput("casosRecuperadosWorld")) , 
-    ),fluidRow(
-      column(6,box( title = "Casos Activos", status = "primary", solidHeader = TRUE,
-                    collapsible = TRUE,hr(),div(verbatimTextOutput("textActiveCase")))),    
-      column(6,box( title = "Casos Cerrados", status = "primary", solidHeader = TRUE,
-                    collapsible = TRUE,hr(),div(verbatimTextOutput("textClosedCase"))) ) 
-    
+      uiOutput("box_keyFigures")
     ),
     fluidRow(
       class = "details",
       column(
         box(
           width = 12,
-          #leafletOutput("global_map1"),
-          verbatimTextOutput("TextDataGlobalUpdate")
+          leafletOutput("overview_map")
         ),
         class = "map",
         width = 8,
         style = 'padding:0px;'
       ),
       column(
-        #uiOutput("summaryTables"),
+        uiOutput("summaryTables"),
         class = "summary",
         width = 4,
         style = 'padding:0px;'

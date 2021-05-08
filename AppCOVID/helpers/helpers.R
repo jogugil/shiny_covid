@@ -143,3 +143,5 @@ myGauge <- function(id, label, value) {
            tags$meter( id = id, value = value ) 
   ) 
 }
+
+
