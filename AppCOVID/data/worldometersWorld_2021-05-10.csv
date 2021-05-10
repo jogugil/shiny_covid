@@ -1,2 +1,2 @@
-"World-country-continental","world","NewCases","TotalDeaths","NewDeaths","TotalRecovered","NewRecovered","ActiveCases","CritcalCase","TotalCase1M","DeathsCase1M","TotalTests","test1Mpop","Population","Continent","Caseevery","Deathevery","Testevery","newCase1M","deathsCase1M","ActiveCas1M"
-"World","158968165","8415","3306675","143","137409537","28878","18251953","107131","20394","424.2","","",7823707620,"All","","",NA,NA,NA,""
+"Id","world","TotalCases","NewCases","TotalDeaths","NewDeaths","TotalRecovered","NewRecovered","ActiveCases","CritcalCase","TotalCase1M","DeathsCase1M","TotalTests","test1Mpop","Population","Continent","Caseevery","Deathevery","Testevery","newCase1M","deathsCase1M","ActiveCas1M"
+NA,"World","159029697","69896","3308277","1713","137502092","115997","18219328","106934","20402","424.4","","","","All","","",NA,NA,NA,""

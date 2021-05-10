@@ -2,9 +2,10 @@
 
 Utilizamos cookies propias y de terceros para mejorar tu experiencia y nuestros servicios analizando tu navegación en
 nuestro sitio web y cómo interactúa con nosotros. Por tanto, este sitio web utiliza cookies técnicas para navegar y
-mostrar páginas de información; Cookies de personalización para mostrar un sitio web más adaptado a sus gustos (idi oma,
-menús de nivel de detalle y coo kies de análisis para crear estadísticas de interés con el único objetivo de mejorar
-nuestro sitio web y ofrecer a nuestros clientes / usuarios una información más precisa. Para dar su consentimiento para su uso, presione el botón "Acepto".
+mostrar páginas de información; Cookies de personalización para mostrar un sitio web más adaptado a sus gustos (idioma,
+menús de nivel de detalle y cookies de análisis para crear estadísticas de interés con el único objetivo de mejorar
+nuestro sitio web) y ofrecer a nuestros clientes / usuarios una información más precisa.  
+
 Puede obtener más información consultando nuestra Política de Cookies.
 
 ### Configuración de cookies

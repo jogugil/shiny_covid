@@ -372,7 +372,7 @@ shinyServer(function(input, output,session) {
     ##################
     output$valueBox_confirmedWDMETER <- renderValueBox({
       valueBox(
-        global_COvidDataWDMeterWorld$world,
+        global_COvidDataWDMeterWorld$TotalCases,
         subtitle = "Total Confirmed Worldwide",
         icon     = icon("file-medical"),
         color    = "light-blue",
@@ -425,7 +425,7 @@ shinyServer(function(input, output,session) {
     )})
     
     output$globalCases_ContinentWDMETER <- renderPlot({
-      ggplot(data_CONTINENTWDMETER,aes(x=2,y=prop_cont, fill=World.country.continental))+
+      ggplot(data_CONTINENTWDMETER,aes(x=2,y=prop_cont, fill=continent))+
         geom_bar(stat = "identity", color="white")+
         geom_text(aes(label=percent(prop_cont/100)),
                   position=position_stack(vjust=0.5),color="white",size=6)+
@@ -437,7 +437,7 @@ shinyServer(function(input, output,session) {
       
     })
     output$globalDeatchs_ContinentWDMETER <- renderPlot({
-      ggplot(data_CONTINENTWDMETER,aes(x=2,y=prop_deatchs, fill=World.country.continental))+
+      ggplot(data_CONTINENTWDMETER,aes(x=2,y=prop_deatchs, fill=continent))+
         geom_bar(stat = "identity", color="white")+
         geom_text(aes(label=percent(prop_deatchs/100)),
                   position=position_stack(vjust=0.5),color="white",size=6)+
@@ -449,7 +449,7 @@ shinyServer(function(input, output,session) {
       
     })
     output$globalRecovered_ContinentWDMETER <- renderPlot({
-      ggplot(data_CONTINENTWDMETER,aes(x=2,y=prop_Recovered, fill=World.country.continental))+
+      ggplot(data_CONTINENTWDMETER,aes(x=2,y=prop_Recovered, fill=continent))+
         geom_bar(stat = "identity", color="white")+
         geom_text(aes(label=percent(prop_Recovered/100)),
                   position=position_stack(vjust=0.5),color="white",size=6)+
@@ -461,7 +461,7 @@ shinyServer(function(input, output,session) {
       
     })
     output$globalActive_ContinentWDMETER <- renderPlot({
-      ggplot(data_CONTINENTWDMETER,aes(x=2,y=prop_Active, fill=World.country.continental))+
+      ggplot(data_CONTINENTWDMETER,aes(x=2,y=prop_Active, fill=continent))+
         geom_bar(stat = "identity", color="white")+
         geom_text(aes(label=percent(prop_Active/100)),
                   position=position_stack(vjust=0.5),color="white",size=6)+
@@ -497,8 +497,9 @@ shinyServer(function(input, output,session) {
   #
   ###########
   
+   
   output$tabsBoxRecomendaOMS <- renderUI({
-    
+    is_filesRecomOMS ()
     mytabs <- load_filesRecomOMS ()
     if(!is.null(mytabs)) {
       do.call(tabBox, args = c(width = 1024, mytabs))
@@ -506,7 +507,7 @@ shinyServer(function(input, output,session) {
       box(h3("No existen recomendaiones de la OMS en estos momentos."))
     }
   }) 
-  
+ 
   ###################################
   ### Descarga y actualización de datos
   ##################################
@@ -527,10 +528,12 @@ shinyServer(function(input, output,session) {
   output$tabsRecomendaOMS <- renderText({
     images <- donwload_scrapingOMS (input, output,session)
     l   <- length(images)
-    if(l>0)
+    if(l>0) {
+       
       paste0("Se ha actualizado las recomendaciones de la OMS sobre el COVID-19!!.","\n")
-    else
+     } else {
       paste0("No existen recomendaiones actualmente sobre el COVID-19."," \n")
+    }
     
   }) 
   ###########################################################################

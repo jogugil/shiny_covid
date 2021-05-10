@@ -52,50 +52,112 @@ jhonH_confirmed    <- sprintf("%s/time_series_covid19_confirmed_global.csv",PATH
 jhonH_deceased     <- sprintf("%s/time_series_covid19_deaths_global.csv",PATH_DATA)
 jhonH_recovered    <- sprintf("%s/time_series_covid19_recovered_global.csv",PATH_DATA)
 
-#Datos e España por provincia
-spdata_CC     <- sprintf("%s/casos_diagnostico_ccaa.csv",PATH_DATA)
+#Datos de España por comunidad
+spdata_CC     <- sprintf("%s/casos_diagnostico_ccaa_%s.csv",PATH_DATA,nowdate)
 ##############
 #
 # Crea y descarga los ficheros CSV de datos  del virus
 ###############
 
+#########################
+##
+# Comprobamos si estan los ficheros de recomendaion 
+# si no están los descargamos
+#################
+is_filesRecomOMS <- function(){
+  files  <-  list.files(path=PATH__RECOMEN_IMG_OMS,pattern='*.png')
+  l   <- length(files)
+ 
+  mytabs <- NULL
+  #Si no estñan los ficheros lso descargamos y kos copiamos en local
+  if (l<=0) {
+    url_recomendationsOMS ='https://www.who.int/es/emergencies/diseases/novel-coronavirus-2019/advice-for-public'
+    html <-  url_recomendationsOMS  %>% read_html()  
+    #obtenemos sólo los poster resumen de las recomendaciones de la OMS
+    images <- html %>% html_nodes(".lazy") %>% lapply(., function (node) {
+      df <- NULL
+      is_corona <- node %>% html_attr ('data-src')%>%grepl('coronavirus',.) 
+      if(is_corona) {
+        printApp (node %>% html_attr ('alt') )
+        alt  <- node %>% html_attr ('alt')  
+        is_ptr <- alt %>% stringr::str_locate (.,"^COVID-19 :")
+        printApp (is_ptr)
+        label <- alt
+        if(!is.na(is_ptr[[2]]))
+          label <- str_trim(substring(alt,is_ptr[[2]]+1))
+        label <- gsub (" ","_",label)
+        printApp (label)
+        filename <- paste(PATH__RECOMEN_IMG_OMS,str_trim(label),sep='/')
+        filename <- paste(str_trim(filename),'png',sep='.')
+        printApp (filename)
+        href <- paste ("https://www.who.int",node %>% html_attr ('data-image'),sep='/')
+        print(href)
+        df <- data.frame (title =alt,href=href)
+        download.file(href, destfile = filename, mod = "wb")
+        #download.file(href, destfile = "./www", mod = "wb")
+      } 
+      df
+    }) 
+    
+  }
+  
+}
+
+
+
+
 update_files <- function () {
   url_CSVOMS <- "https://covid19.who.int/WHO-COVID-19-global-table-data.csv"
   url_world  <- "https://www.worldometers.info/coronavirus/"
-  url_sp <- "https://cnecovid.isciii.es/covid19/resources/casos_diagnostico_ccaa.csv"  #Descargamos el fichero de la OMS
+  url_sp     <- "https://cnecovid.isciii.es/covid19/resources/casos_diagnostico_ccaa.csv"  
+  
+  
+  #Descargamos el fichero de la OMS y lo guardamos en local
   filename <- createFilename (path=PATH_DATA,name="globalDataOMS")
-  data_file <- read.csv(url_CSVOMS)
-  names(data_file) <-  PKI_OMS
-  write.csv(data_file,filename)
+  if(!file.exists(filename)) {
+    data_file <- read.csv(url_CSVOMS)
+    names(data_file) <-  PKI_OMS
+    write.csv(data_file,filename,row.names = FALSE)
+  }
   
-  #Descargamos el fichero de   worldometers con web scraping
-  my_table<- url_world %>% read_html() %>% html_table() %>%.[[1]]
-  my_table[]<-lapply(my_table, function(x) (gsub("\\,|\\+", "", (x))))
-  names(my_table) <- PKI_WD
+   
+  if(!file.exists(wldometer_World)) {
   
-  # convert all but the first and last column to numeric
-  continent <-  my_table[1:6,]
-  names(continent)[2] <- 'continent'
-  world     <-  my_table[8,]
-  names(world)[2] <- 'world'
-  contry    <-  my_table[9:230,]  
-  names(contry)[2] <- 'contry'
-  
-  fCont <- createFilename (path=PATH_DATA,name="worldometersContinent")
-  write.csv(continent,fCont)
-  fworld <- createFilename (path=PATH_DATA,name="worldometersWorld")
-  write.csv(world,fworld)
-  fcountry <- createFilename (path=PATH_DATA,name="worldometersCountry")
-  write.csv(contry,fcountry)
+    #Descargamos el fichero de   worldometers con web scraping y guardamos los tres ficheros en local
+    my_table<- url_world %>% read_html() %>% html_table() %>%.[[1]]
+    my_table[]<-lapply(my_table, function(x) (gsub("\\,|\\+", "", (x))))
+    names(my_table) <- PKI_WD
+    my_table <- my_table %>% dplyr::select(-c(Id))
+    continent <-  my_table[1:6,]
+    names(continent)[1] <- 'continent'
+    world     <-  my_table[8,]
+    names(world)[1] <- 'world'
+    contry    <-  my_table[9:230,]  
+    names(contry)[1] <- 'contry'
+    
+    fCont <- createFilename (path=PATH_DATA,name="worldometersContinent")
+    write.csv(continent,fCont,row.names = FALSE)
+    fworld <- createFilename (path=PATH_DATA,name="worldometersWorld")
+    write.csv(world,fworld,row.names = FALSE)
+    fcountry <- createFilename (path=PATH_DATA,name="worldometersCountry")
+    write.csv(contry,fcountry,row.names = FALSE)
+  }
   
   #Descargamos datos de  España
-  filename <- createFilename (path=PATH_DATA,name="spdata_CC")
-  data_file <- read.csv(url_sp)
-  write.csv(data_file,filename)
+  if(!file.exists(spdata_CC)) {
+    filename <- createFilename (path=PATH_DATA,name="casos_diagnostico_ccaa")
+    data_file <- read.csv(url_sp)
+    write.csv(data_file,filename,row.names = FALSE)
+  }
+  
+  
+   
 }
-if(!file.exists(omsGlobal))
-    update_files()
 
+#Compruebo si no están los ficheros, Si no lo estñan los descargo y actualizo cada día
+    update_files()
+#Ficheros de recomendacion de la OMS
+is_filesRecomOMS ()
 #Ficheros Datos Actualizados COvid-19
 global_COvidDataOMS               <- NULL
 global_COvidDataWDMeterWorld      <- NULL
@@ -177,8 +239,8 @@ update_dataOMS <- function (filterType) {
 ##################
 # Datos de porporciones por continente de WDMETER.com
 #############
-data_CONTINENTWDMETER  <- global_COvidDataWDMeterContinent %>% dplyr::select (c(World.country.continental,continent,TotalDeaths,TotalRecovered,ActiveCases))
-data_CONTINENTWDMETER  <- data_CONTINENTWDMETER %>%  mutate ( prop_cont      =  (continent/sum(continent))*100,
+data_CONTINENTWDMETER  <- global_COvidDataWDMeterContinent %>% dplyr::select (c(continent,TotalCases,TotalDeaths,TotalRecovered,ActiveCases))
+data_CONTINENTWDMETER  <- data_CONTINENTWDMETER %>%  mutate ( prop_cont      =  (TotalCases/sum(TotalCases))*100,
                                                         prop_deatchs   = (TotalDeaths/sum(TotalDeaths))*100,
                                                         prop_Recovered = (TotalRecovered/sum(TotalRecovered))*100,
                                                         prop_Active     = (ActiveCases/sum(ActiveCases))*100
@@ -395,7 +457,7 @@ sumData <- function(date) {
 ##jhonH_deceased     <- sprintf("%s/time_series_covid19_deaths_global.csv",PATH_DATA)
 ##jhonH_recovered    <- sprintf("%s/time_series_covid19_recovered_global.csv",PATH_DATA)
 
-#Datos e España por provincia
+#Datos de España por provincia
 ##spdata_CC     <- sprintf("%s/casos_diagnostico_ccaa.csv",PATH_DATA)
 
 load_files <- function () {
@@ -410,7 +472,8 @@ load_files <- function () {
       global_COvidDataWDMeterCountry    <- read.csv(wldometer_Country)
     if (is.null(global_COvidDataWDMeterContinent))
       global_COvidDataWDMeterContinent  <- read.csv(wldometer_Continent)
-    
+    if(is.null (casos_cc))
+      casos_cc <- read.csv (casos_cc)
  
   } ,
     warning = function(w) {
@@ -472,7 +535,7 @@ download_SpdataCC <- function (input,output,session) {
     updateProgress(detail = text,progress=progress)
   }
   
-  filename <- createFilename (path=PATH_DATA,name="spdata_CC")
+  filename <- createFilename (path=PATH_DATA,name="casos_diagnostico_ccaa")
   
   if (is.function(updateProgress)) {
     text <- paste0("t0:",difftime(Sys.time(), t0, u = 'secs'), " t1:", round(STANDBY_TIME))
@@ -505,7 +568,7 @@ download_SpdataCC <- function (input,output,session) {
        withProgress(message = 'And this also', detail = "This other thing",
                    style = style, value = NULL, {
                      Sys.sleep(0.75)
-                     write.csv(data_file,filename)
+                     write.csv(data_file,filename,row.names = FALSE)
                      if(file.exists(filename))
                        res <- "Los datos han sido actualizados desde la web del Ministerior !!!"
                      else
@@ -687,16 +750,16 @@ donwload_scrapingWorldometers <- function (input, output,session) {
         updateProgress(detail = text,progress=progress)
       }
       
-      
       names(my_table) <- PKI_WD
-      my_table <-  my_table %>% dplyr::select (c(-Id))
-      
+      my_table <- my_table %>% dplyr::select(-c(Id))
       continent <-  my_table[1:6,]
-      names(continent)[2] <- 'continent'
+      names(continent)[1] <- 'continent'
       world     <-  my_table[8,]
-      names(world)[2] <- 'world'
+      names(world)[1] <- 'world'
       contry    <-  my_table[9:230,]  
-      names(contry)[2] <- 'contry'
+      names(contry)[1] <- 'contry'
+      
+      
       world$Population <- sum(as.numeric(contry$Population), na.rm = TRUE)
       
       incProgress(0.5)
@@ -766,9 +829,10 @@ donwload_scrapingOMS <- function (input, output,session) {
                                                           filename <- paste(str_trim(filename),'png',sep='.')
                                                           print (filename)
                                                           href <- paste ("https://www.who.int",node %>% html_attr ('data-image'),sep='/')
-                                                          print(href)
+                                                          printApp(href)
                                                           df <- data.frame (title =alt,href=href)
                                                           download.file(href, destfile = filename, mod = "wb")
+                                                          #download.file(href, destfile = "./www", mod = "wb")
                                                         } 
                                                         df
                                                       }) 
@@ -791,11 +855,15 @@ load_filesRecomOMS<- function (input, output,session) {
   patron <- ".\\w*$" #Eliminamos la extensión del fichero (tendría que ser png, aquí no se comprueba)
   files  <-  list.files(path=PATH__RECOMEN_IMG_OMS,pattern='*.png')
   l   <- length(files)
+  printApp("LOAD_FILES")
+  printApp(l)
   mytabs <- NULL
   if (l>0) {
-    #Copiamos al directorio cache (www) los ficheros png
+    #Copiamos al directorio cache (www)  y al directorio data los ficheros png
     lapply(files, function(x) file.copy(paste (PATH__RECOMEN_IMG_OMS, x , sep = "/"),
                                               paste ("www",x, sep = "/"), recursive = FALSE,  copy.mode = TRUE))
+    lapply(files, function(x) file.copy(paste (PATH__RECOMEN_IMG_OMS, x , sep = "/"),
+                                        paste ("data",x, sep = "/"), recursive = FALSE,  copy.mode = TRUE))
     
     mytabs <- lapply(1:l, function(i) {
       title <- files[i] %>% sub (patron,"",.)%>% str_trim(.)
@@ -809,5 +877,3 @@ load_filesRecomOMS<- function (input, output,session) {
   }
   mytabs
 }
-
- 

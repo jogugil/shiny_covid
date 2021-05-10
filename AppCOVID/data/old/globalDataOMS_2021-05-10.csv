@@ -1,5 +1,5 @@
 "Name","Region","casesCumulative","cumulative100000p","reported7d","reported7d100000p","reported24h","deathsCumulative","deathsCumulative100000p","deathsreported7d","deathsreported7d100000p","deathsreported24h","transmisionType"
-"Global","",157289118,2014.89698310125,5444758,69.748159360372,786943,3277272,41.9823414967728,89748,1.14968522132199,12994,""
+"Global","Global",157289118,2014.89698310125,5444758,69.748159360372,786943,3277272,41.9823414967728,89748,1.14968522132199,12994,"Not applicable"
 "United States of America","Americas",32300609,9758.41,298281,90.11,43193,575322,173.81,4785,1.45,804,"Community transmission"
 "India","South-East Asia",22296414,1615.68,2738957,198.47,403738,242362,17.56,26820,1.94,4092,"Clusters of cases"
 "Brazil","Americas",15082449,7095.64,423438,199.21,78886,419114,197.17,15333,7.21,2165,"Community transmission"
