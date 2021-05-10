@@ -7,75 +7,18 @@
 #    http://shiny.rstudio.com/
 #
 
-library(shiny)
-library(shinyWidgets)
+ 
+library(scales)
 library(ggplot2)
-library(shiny)
-library(shinydashboard)
-source("./helpers/global.R") 
-source("./helpers/helpers.R")
-source("./pages/map.R")
-library(shiny)
 library(leaflet)
-library(RColorBrewer)
-library(xts)
-library(rgdal)
+ 
 library(DT)
- 
- 
-  
-compute_data <- function(updateProgress = NULL) {
-  # Create 0-row data frame which will be used to store data
-  dat <- data.frame(x = numeric(0), y = numeric(0))
-  
-  for (i in 1:10) {
-    Sys.sleep(0.25)
-    
-    # Compute new row of data
-    new_row <- data.frame(x = rnorm(1), y = rnorm(1))
-    
-    # If we were passed a progress update function, call it
-    if (is.function(updateProgress)) {
-      text <- paste0("x:", round(new_row$x, 2), " y:", round(new_row$y, 2))
-      updateProgress(detail = text)
-    }
-    
-    # Add the new row of data
-    dat <- rbind(dat, new_row)
-  }
-  
-  dat
-}
-server_table <- function (input,output,session) {
-  style <- isolate(input$style)
-  
-  # Create a Progress object
-  progress <- shiny::Progress$new(style = style)
-  progress$set(message = "Computing data", value = 0)
-  # Close the progress when this reactive exits (even if there's an error)
-  on.exit(progress$close())
-  
-  # Create a closure to update progress.
-  # Each time this is called:
-  # - If `value` is NULL, it will move the progress bar 1/5 of the remaining
-  #   distance. If non-NULL, it will set the progress to that value.
-  # - It also accepts optional detail text.
-  updateProgress <- function(value = NULL, detail = NULL) {
-    if (is.null(value)) {
-      value <- progress$getValue()
-      value <- value + (progress$getMax() - value) / 5
-    }
-    progress$set(value = value, detail = detail)
-  }
-  
-  # Compute the new data, and pass in the updateProgress function so
-  # that it can update the progress indicator.
-  compute_data(updateProgress)
-}
+library(rgdal) 
+library(htmltools)
+
 
 shinyServer(function(input, output,session) {
-  
-  ##########################
+     ##########################
   # Internacionalización
   #######################
   observeEvent(input$selected_language, {
@@ -88,31 +31,12 @@ shinyServer(function(input, output,session) {
   # Contenido dinámico a traducir
   ###########
   globalUpdate_var <- reactive ({
-      
-      load_Data (input, output,session)
-     
-  })
+       load_Data (input, output,session)
+   })
   output$globalUpdate <- renderText({i18n$t(globalUpdate_var()) })
   
  
-  ############
-  ## Actualizamos los datos al entrar a la app
-  #######
-  output$casosCoronaWorld <- renderValueBox({
-    req(global_COvidDataWDMeterWorld)
-    case <- global_COvidDataWDMeterWorld$TotalCases
-     paste(case,i18n$t("Casos Totales"),sep="")
-  })
-  output$casosFallecidosWorld <- renderValueBox({
-    req(global_COvidDataWDMeterWorld)
-    case <- global_COvidDataWDMeterWorld$TotalDeaths
-    paste(case,i18n$t("Fallecidos Totales"),case,sep="")
-  })
-  output$casosRecuperadosWorld <- renderValueBox({
-    req(global_COvidDataWDMeterWorld)
-    case <- global_COvidDataWDMeterWorld$TotalRecovered
-    paste(case,i18n$t("Recuperados Totales"),case,sep="")
-  })
+  
   
   ###########
   #
@@ -121,28 +45,156 @@ shinyServer(function(input, output,session) {
   ###########
   #################################
   ###
-  ## MApa Global con la serie de tiempo
+  ## Mapa Global con la serie de tiempo
   ####################################
   #Creamos el mapa con la serie temporal de evolución de la pandemia en el mundo.
-  output$overview_map <- renderLeaflet(map)
-  
-  
-  #Datos de seguimiento de la pandemia
-  output$box_keyFigures <- renderUI(box(
-    title = paste0("Key Figures (", strftime(input$timeSlider, format = "%d.%m.%Y"), ")"),
-    fluidRow(
-      column(
-        valueBoxOutput("valueBox_confirmed", width = 3),
-        valueBoxOutput("valueBox_recovered", width = 3),
-        valueBoxOutput("valueBox_deceased", width = 3),
-        valueBoxOutput("valueBox_countries", width = 3),
-        width = 12,
-        style = "margin-left: -20px"
+  output$global_map <- renderLeaflet(
+    map
+  )
+  observe({
+    data <- data_atDate(input$timeSlider)
+  })
+  observe({
+    req(input$timeSlider, input$global_map_zoom)
+    zoomLevel               <- input$global_map_zoom
+    data                    <- data_atDate(input$timeSlider) %>% addLabel()
+    data$confirmedPerCapita <- data$confirmed / data$population * 100000
+    data$activePerCapita    <- data$active / data$population * 100000
+    
+    leafletProxy("global_map", data = data) %>%
+      clearMarkers() %>%
+      addCircleMarkers(
+        lng          = ~Long,
+        lat          = ~Lat,
+        radius       = ~log(confirmed^(zoomLevel / 2)),
+        stroke       = FALSE,
+        fillOpacity  = 0.5,
+        label        = ~label,
+        labelOptions = labelOptions(textsize = 15),
+        group        = "Confirmed"
+      ) %>%
+      addCircleMarkers(
+        lng          = ~Long,
+        lat          = ~Lat,
+        radius       = ~log(confirmedPerCapita^(zoomLevel)),
+        stroke       = FALSE,
+        color        = "#00b3ff",
+        fillOpacity  = 0.5,
+        label        = ~label,
+        labelOptions = labelOptions(textsize = 15),
+        group        = "Confirmed (per capita)"
+      ) %>%
+      addCircleMarkers(
+        lng          = ~Long,
+        lat          = ~Lat,
+        radius       = ~log(recovered^(zoomLevel)),
+        stroke       = FALSE,
+        color        = "#005900",
+        fillOpacity  = 0.5,
+        label        = ~label,
+        labelOptions = labelOptions(textsize = 15),
+        group = "Estimated Recoveries"
+      ) %>%
+      addCircleMarkers(
+        lng          = ~Long,
+        lat          = ~Lat,
+        radius       = ~log(deceased^(zoomLevel)),
+        stroke       = FALSE,
+        color        = "#E7590B",
+        fillOpacity  = 0.5,
+        label        = ~label,
+        labelOptions = labelOptions(textsize = 15),
+        group        = "Deceased"
+      ) %>%
+      addCircleMarkers(
+        lng          = ~Long,
+        lat          = ~Lat,
+        radius       = ~log(active^(zoomLevel / 2)),
+        stroke       = FALSE,
+        color        = "#f49e19",
+        fillOpacity  = 0.5,
+        label        = ~label,
+        labelOptions = labelOptions(textsize = 15),
+        group        = "Active"
+      ) %>%
+      addCircleMarkers(
+        lng          = ~Long,
+        lat          = ~Lat,
+        radius       = ~log(activePerCapita^(zoomLevel)),
+        stroke       = FALSE,
+        color        = "#f4d519",
+        fillOpacity  = 0.5,
+        label        = ~label,
+        labelOptions = labelOptions(textsize = 15),
+        group        = "Active (per capita)"
       )
-    ),
-    div("Last updated: ", strftime(changed_date, format = "%d.%m.%Y - %R %Z")),
-    width = 12
-  ))
+  })
+  #################################
+  ###
+  #Datos principales de seguimiento de la pandemia
+  #################################
+  output$summaryTables <- renderUI({
+ 
+    tabBox(
+      tabPanel("Country/Region",
+               div(
+                 dataTableOutput("summaryDT_country"),
+                 style = "margin-top: -10px")
+      ),
+      tabPanel("Province/State",
+               div(
+                 dataTableOutput("summaryDT_state"),
+                 style = "margin-top: -10px"
+               )
+      ),
+      width = 12
+    )
+  })
+  
+  output$summaryDT_country <- renderDataTable(
+          getSummaryDT(data_atDate(last_date), "Country/Region", selectable = TRUE)
+  )
+  proxy_summaryDT_country  <- dataTableProxy("summaryDT_country")
+  output$summaryDT_state   <- renderDataTable(
+    getSummaryDT(data_atDate(last_date), "Province/State", selectable = TRUE))
+  proxy_summaryDT_state    <- dataTableProxy("summaryDT_state")
+  
+  observeEvent(input$timeSlider, {
+    data <- data_atDate(input$timeSlider)
+    replaceData(proxy_summaryDT_country, summariseData(data, "Country/Region"), rownames = FALSE)
+    replaceData(proxy_summaryDT_state, summariseData(data, "Province/State"), rownames = FALSE)
+  }, ignoreInit = TRUE, ignoreNULL = TRUE)
+  
+  observeEvent(input$summaryDT_country_row_last_clicked, {
+    selectedRow     <- input$summaryDT_country_row_last_clicked
+    selectedCountry <- summariseData(data_atDate(input$timeSlider), "Country/Region")[selectedRow, "Country/Region"]
+    location        <- data_evolution %>%
+      distinct(`Country/Region`, Lat, Long) %>%
+      filter(`Country/Region` == selectedCountry) %>%
+      summarise(
+        Lat  = mean(Lat),
+        Long = mean(Long)
+      )
+    leafletProxy("global_map") %>%
+      setView(lng = location$Long, lat = location$Lat, zoom = 4)
+  })
+  
+  observeEvent(input$summaryDT_state_row_last_clicked, {
+    selectedRow     <- input$summaryDT_state_row_last_clicked
+    selectedCountry <- summariseData(data_atDate(input$timeSlider), "Province/State")[selectedRow, "Province/State"]
+    location <- data_evolution %>%
+      distinct(`Province/State`, Lat, Long) %>%
+      filter(`Province/State` == selectedCountry) %>%
+      summarise(
+        Lat  = mean(Lat),
+        Long = mean(Long)
+      )
+    leafletProxy("global_map") %>%
+      setView(lng = location$Long, lat = location$Lat, zoom = 4)
+  })
+  
+  
+  
   key_figures <- reactive({
     data           <- sumData(input$timeSlider)
     data_yesterday <- sumData(input$timeSlider - 1)
@@ -164,7 +216,7 @@ shinyServer(function(input, output,session) {
   })
   
   output$valueBox_confirmed <- renderValueBox({
-    shinydashboard::valueBox(
+    valueBox(
       key_figures()$confirmed,
       subtitle = "Confirmed",
       icon     = icon("file-medical"),
@@ -175,7 +227,7 @@ shinyServer(function(input, output,session) {
   
   
   output$valueBox_recovered <- renderValueBox({
-    shinydashboard::valueBox(
+    valueBox(
       key_figures()$recovered,
       subtitle = "Estimated Recoveries",
       icon     = icon("heart"),
@@ -184,7 +236,7 @@ shinyServer(function(input, output,session) {
   })
   
   output$valueBox_deceased <- renderValueBox({
-    shinydashboard::valueBox(
+    valueBox(
       key_figures()$deceased,
       subtitle = "Deceased",
       icon     = icon("heartbeat"),
@@ -193,7 +245,7 @@ shinyServer(function(input, output,session) {
   })
   
   output$valueBox_countries <- renderValueBox({
-    shinydashboard::valueBox(
+    valueBox(
       key_figures()$countries,
       subtitle = "Affected Countries",
       icon     = icon("flag"),
@@ -201,117 +253,252 @@ shinyServer(function(input, output,session) {
     )
   })
   
-  
-  output$summaryTables <- renderUI({
-    tabBox(
-      tabPanel("Country/Region",
-               div(
-                 dataTableOutput("summaryDT_country"),
-                 style = "margin-top: -10px")
-      ),
-      tabPanel("Province/State",
-               div(
-                 dataTableOutput("summaryDT_state"),
-                 style = "margin-top: -10px"
-               )
-      ),
-      width = 12
+  output$box_keyFigures <- renderUI({box(
+    title = paste0("Key Figures (", strftime(input$timeSlider, format = "%d.%m.%Y"), ")"),
+    fluidRow(
+      column(
+        valueBoxOutput("valueBox_confirmed", width = 6),
+        valueBoxOutput("valueBox_recovered", width = 6),
+        valueBoxOutput("valueBox_deceased", width = 6),
+        valueBoxOutput("valueBox_countries", width = 6),
+        width = 12,
+        style = "margin-left: -20px"
+      )
+    ),
+    div("Last updated: ", strftime(changed_date, format = "%d.%m.%Y - %R %Z")),
+    width = 12
+  )})
+  ###############################
+  ###
+  # GRÁFICO CON PLOTLY LINETIME
+  ##############################
+  output$selectize_doublingTime_Country <- renderUI({
+    selectizeInput(
+      "selectize_doublingTime_Country",
+      label    = "Select Countries",
+      choices  = unique(data_evolution$`Country/Region`),
+      selected = top5_countries,
+      multiple = TRUE
     )
   })
   
-  output$summaryDT_country <- renderDataTable(getSummaryDT(data_atDate(current_date), "Country/Region", selectable = TRUE))
-  proxy_summaryDT_country  <- dataTableProxy("summaryDT_country")
-  output$summaryDT_state   <- renderDataTable(getSummaryDT(data_atDate(current_date), "Province/State", selectable = TRUE))
-  proxy_summaryDT_state    <- dataTableProxy("summaryDT_state")
-  
-  observeEvent(input$timeSlider, {
-    data <- data_atDate(input$timeSlider)
-    replaceData(proxy_summaryDT_country, summariseData(data, "Country/Region"), rownames = FALSE)
-    replaceData(proxy_summaryDT_state, summariseData(data, "Province/State"), rownames = FALSE)
-  }, ignoreInit = TRUE, ignoreNULL = TRUE)
-  
-  observeEvent(input$summaryDT_country_row_last_clicked, {
-    selectedRow     <- input$summaryDT_country_row_last_clicked
-    selectedCountry <- summariseData(data_atDate(input$timeSlider), "Country/Region")[selectedRow, "Country/Region"]
-    location        <- data_evolution %>%
-      distinct(`Country/Region`, Lat, Long) %>%
-      filter(`Country/Region` == selectedCountry) %>%
-      summarise(
-        Lat  = mean(Lat),
-        Long = mean(Long)
-      )
-    leafletProxy("overview_map") %>%
-      setView(lng = location$Long, lat = location$Lat, zoom = 4)
+  output$selectize_doublingTime_Variable <- renderUI({
+    selectizeInput(
+      "selectize_doublingTime_Variable",
+      label    = "Select Variable",
+      choices  = list("Confirmed" = "doublingTimeConfirmed", "Deceased" = "doublingTimeDeceased"),
+      multiple = FALSE
+    )
   })
-  
-  observeEvent(input$summaryDT_state_row_last_clicked, {
-    selectedRow     <- input$summaryDT_state_row_last_clicked
-    selectedCountry <- summariseData(data_atDate(input$timeSlider), "Province/State")[selectedRow, "Province/State"]
-    location <- data_evolution %>%
-      distinct(`Province/State`, Lat, Long) %>%
-      filter(`Province/State` == selectedCountry) %>%
+  output$timeLinePlot <- renderPlotly({
+    req(input$selectize_doublingTime_Country, input$selectize_doublingTime_Variable)
+    daysGrowthRate <- 7
+    data           <- data_evolution %>%
+      pivot_wider(id_cols = c(`Province/State`, `Country/Region`, date, Lat, Long), names_from = var, values_from = value) %>%
+      filter(if (input$selectize_doublingTime_Variable == "doublingTimeConfirmed") (confirmed >= 100) else (deceased >= 10)) %>%
+      filter(if (is.null(input$selectize_doublingTime_Country)) TRUE else `Country/Region` %in% input$selectize_doublingTime_Country) %>%
+      group_by(`Country/Region`, date) %>%
+      dplyr::select(-recovered, -active) %>%
       summarise(
-        Lat  = mean(Lat),
-        Long = mean(Long)
-      )
-    leafletProxy("overview_map") %>%
-      setView(lng = location$Long, lat = location$Lat, zoom = 4)
-  })
-  
-  summariseData <- function(df, groupBy) {
-    df %>%
-      group_by(!!sym(groupBy)) %>%
-      summarise(
-        "Confirmed"            = sum(confirmed, na.rm = T),
-        "Estimated Recoveries" = sum(recovered, na.rm = T),
-        "Deceased"             = sum(deceased, na.rm = T),
-        "Active"               = sum(active, na.rm = T)
+        confirmed = sum(confirmed, na.rm = T),
+        deceased  = sum(deceased, na.rm = T)
       ) %>%
-      as.data.frame()
-  }
-  
-  getSummaryDT <- function(data, groupBy, selectable = FALSE) {
-    datatable(
-      na.omit(summariseData(data, groupBy)),
-      rownames  = FALSE,
-      options   = list(
-        order          = list(1, "desc"),
-        scrollX        = TRUE,
-        scrollY        = "37vh",
-        scrollCollapse = T,
-        dom            = 'ft',
-        paging         = FALSE
-      ),
-      selection = ifelse(selectable, "single", "none")
+      arrange(date) %>%
+      mutate(
+        doublingTimeConfirmed = round(log(2) / log(1 + (((confirmed - lag(confirmed, daysGrowthRate)) / lag(confirmed, daysGrowthRate)) / daysGrowthRate)), 1),
+        doublingTimeDeceased  = round(log(2) / log(1 + (((deceased - lag(deceased, daysGrowthRate)) / lag(deceased, daysGrowthRate)) / daysGrowthRate)), 1),
+      ) %>%
+      mutate("daysSince" = row_number()) %>%
+      filter(!is.na(doublingTimeConfirmed) | !is.na(doublingTimeDeceased))
+    
+    p <- plot_ly(data = data, x = ~daysSince, y = data[[input$selectize_doublingTime_Variable]], color = ~`Country/Region`, type = 'scatter', mode = 'lines')
+    
+    if (input$selectize_doublingTime_Variable == "doublingTimeConfirmed") {
+      p <- layout(p,
+                  yaxis = list(title = "Doubling time of confirmed cases in days"),
+                  xaxis = list(title = "# Days since 100th confirmed case")
+      )
+    } else {
+      p <- layout(p,
+                  yaxis = list(title = "Doubling time of deceased cases in days"),
+                  xaxis = list(title = "# Days since 10th deceased case")
+      )
+    }
+    
+    return(p)
+  })
+  ##################
+  ## DATOS GLOBALES OMS
+  #  INDCIDENCIA ACUMULADA 14d
+  ########
+    output$selectize_cumulate_Variable <- renderUI({
+      selectizeInput(
+        "selectize_acumulate_Variable",
+        label    = "Select Variable",
+        choices  = list("Casos" = "casesCumulative", "Fallecimientos" = "deathsCumulative", "Reportados 24h" = "reported24h"),
+        multiple = FALSE
+      )
+    })
+    output$selectize_cumulate_type <- renderUI({
+      selectizeInput(
+        "selectize_acumulate_type",
+        label    = "Select Type Transmission",
+        choices  = unique(global_COvidDataOMS$transmisionType),
+        selected = c("Community transmission","Not applicable","Clusters of cases","Sporadic cases","Pending","No cases"),
+        multiple = TRUE
+      )
+      
+    })
+    
+    dataOMS_var <- reactive ({
+      req(input$selectize_acumulate_type)
+      update_dataOMS (input$selectize_acumulate_type)
+    }) 
+    mapOMS_var <- reactive ({
+      req(input$selectize_acumulate_Variable,input$selectize_acumulate_type)
+      load_mapOMS (input$selectize_acumulate_Variable,input$selectize_acumulate_type, input$acumulate_map_zoom)
+       
+    }) 
+    output$acumulate_map <- renderLeaflet({
+      mapOMS_var()
+    })
+       
+   
+    output$summaryDT_OMS <- renderDataTable(
+      dataOMS_var() 
     )
-  }
-  ###########
+    ##################
+    ## Datos wordlMeter
+    ##################
+    output$valueBox_confirmedWDMETER <- renderValueBox({
+      valueBox(
+        global_COvidDataWDMeterWorld$world,
+        subtitle = "Total Confirmed Worldwide",
+        icon     = icon("file-medical"),
+        color    = "light-blue",
+        width    = NULL
+      )
+    })
+    
+    
+    output$valueBox_recoveredWDMETER <- renderValueBox({
+      valueBox(
+        global_COvidDataWDMeterWorld$TotalRecovered,
+        subtitle = "Total Recovered Worldwide",
+        icon     = icon("heart"),
+        color    = "light-blue"
+      )
+    })
+    
+    output$valueBox_deceasedWDMETER <- renderValueBox({
+      valueBox(
+        global_COvidDataWDMeterWorld$TotalDeaths,
+        subtitle = "Total Deaths Worldwide",
+        icon     = icon("heartbeat"),
+        color    = "light-blue"
+      )
+    })
+    
+    output$valueBox_countriesWDMETER <- renderValueBox({
+      valueBox(
+        global_COvidDataWDMeterWorld$ActiveCases,
+        subtitle = "Active Cases Worldwide",
+        icon     = icon("flag"), 
+        color    = "light-blue"
+      )
+    })
+ 
+    
+    output$box_globalDataWorld <- renderUI({box(
+      title = paste0("Global Data Worldwide (", strftime(Sys.Date(), format = "%d.%m.%Y"), ")"),
+      fluidRow(
+        column(
+          valueBoxOutput("valueBox_confirmedWDMETER", width = 6),
+          valueBoxOutput("valueBox_recoveredWDMETER", width = 6),
+          valueBoxOutput("valueBox_deceasedWDMETER", width = 6),
+          valueBoxOutput("valueBox_countriesWDMETER", width = 6),
+          width = 12,
+          style = "margin-left: -20px"
+        )
+      ),
+       width = 12
+    )})
+    
+    output$globalCases_ContinentWDMETER <- renderPlot({
+      ggplot(data_CONTINENTWDMETER,aes(x=2,y=prop_cont, fill=World.country.continental))+
+        geom_bar(stat = "identity", color="white")+
+        geom_text(aes(label=percent(prop_cont/100)),
+                  position=position_stack(vjust=0.5),color="white",size=6)+
+        coord_polar(theta = "y")+
+        scale_fill_manual(values=c("salmon","steelblue","orange","gray","yellow","red"))+
+        theme_void()+
+        labs(title="% Incidence by Region")+
+        xlim(0.5,2.5) 
+      
+    })
+    output$globalDeatchs_ContinentWDMETER <- renderPlot({
+      ggplot(data_CONTINENTWDMETER,aes(x=2,y=prop_deatchs, fill=World.country.continental))+
+        geom_bar(stat = "identity", color="white")+
+        geom_text(aes(label=percent(prop_deatchs/100)),
+                  position=position_stack(vjust=0.5),color="white",size=6)+
+        coord_polar(theta = "y")+
+        scale_fill_manual(values=c("salmon","steelblue","orange","gray","yellow","red"))+
+        theme_void()+
+        labs(title="% Deatchs by Region")+
+        xlim(0.5,2.5) 
+      
+    })
+    output$globalRecovered_ContinentWDMETER <- renderPlot({
+      ggplot(data_CONTINENTWDMETER,aes(x=2,y=prop_Recovered, fill=World.country.continental))+
+        geom_bar(stat = "identity", color="white")+
+        geom_text(aes(label=percent(prop_Recovered/100)),
+                  position=position_stack(vjust=0.5),color="white",size=6)+
+        coord_polar(theta = "y")+
+        scale_fill_manual(values=c("salmon","steelblue","orange","gray","yellow","red"))+
+        theme_void()+
+        labs(title="% Recovered by Region")+
+        xlim(0.5,2.5) 
+      
+    })
+    output$globalActive_ContinentWDMETER <- renderPlot({
+      ggplot(data_CONTINENTWDMETER,aes(x=2,y=prop_Active, fill=World.country.continental))+
+        geom_bar(stat = "identity", color="white")+
+        geom_text(aes(label=percent(prop_Active/100)),
+                  position=position_stack(vjust=0.5),color="white",size=6)+
+        coord_polar(theta = "y")+
+        scale_fill_manual(values=c("salmon","steelblue","orange","gray","yellow","red"))+
+        theme_void()+
+        labs(title="% Tests by Region")+
+        xlim(0.5,2.5) 
+      
+    })
+    
+  ############
+  # DaTOS de ESPAÑA
   #
-  # DATOS de ESPAÑA
-  #
   ###########
-  output$tbl=DT::renderDataTable(casos_cv)
-  output$grafico_1<-renderPlot({casos_cv %>%  group_by(fecha) %>%  summarise( sum = sum(num_casos)) %>%
+  output$tbl=DT::renderDataTable(casos_cc)
+  output$grafico_1<-renderPlot({casos_cc %>%  group_by(fecha) %>%  summarise( sum = sum(num_casos)) %>%
       ggplot() + aes(y=sum,x=fecha) + geom_col()+ xlab("Fecha") + ylab("Casos") +
       ggtitle("Casos en España por fecha") + theme(plot.title = element_text(hjust = 0.5))})
-  output$grafico_2<-renderPlot({casos_cv %>%  group_by(ccaa_iso) %>%  summarise( sum = sum(num_casos)) %>%
+  output$grafico_2<-renderPlot({casos_cc %>%  group_by(ccaa_iso) %>%  summarise( sum = sum(num_casos)) %>%
       ggplot() + aes(y=sum,x=ccaa_iso,fill=ccaa_iso) + geom_col()+ xlab("Comunidades") + ylab("casos") +
       ggtitle("Casos totales por Comunidad") + theme(plot.title = element_text(hjust = 0.5))})
-  output$grafico_3<-renderPlot({casos_cv %>%  group_by(fecha) %>%  summarise( sum = sum(num_casos_prueba_pcr)) %>%
+  output$grafico_3<-renderPlot({casos_cc %>%  group_by(fecha) %>%  summarise( sum = sum(num_casos_prueba_pcr)) %>%
       ggplot() + aes(y=sum,x=fecha) + geom_col()+ xlab("Fecha") + ylab("PCR realizadas") +
       ggtitle("Tests PCR realizados en España por fecha") + theme(plot.title = element_text(hjust = 0.5))})
-  output$grafico_4<-renderPlot({casos_cv %>%  group_by(ccaa_iso) %>%  summarise( sum = sum(num_casos_prueba_pcr)) %>%
+  output$grafico_4<-renderPlot({casos_cc %>%  group_by(ccaa_iso) %>%  summarise( sum = sum(num_casos_prueba_pcr)) %>%
       ggplot() + aes(y=sum,x=ccaa_iso,fill=ccaa_iso) + geom_col()+ xlab("Comunidades") + ylab("PCR realizadas") +
       ggtitle("Test PCR totales realizados por cada comunidad") + theme(plot.title = element_text(hjust = 0.5))})
-   
+  
   ###########
   #
   # RECOMENDACIONES DE LA OMS (CARGAMOS LOS POSTERS almacenados en local y bajados desde su web)
   #
   ###########
   
- output$tabsBoxRecomendaOMS <- renderUI({
- 
+  output$tabsBoxRecomendaOMS <- renderUI({
+    
     mytabs <- load_filesRecomOMS ()
     if(!is.null(mytabs)) {
       do.call(tabBox, args = c(width = 1024, mytabs))
@@ -319,19 +506,21 @@ shinyServer(function(input, output,session) {
       box(h3("No existen recomendaiones de la OMS en estos momentos."))
     }
   }) 
-
+  
   ###################################
   ### Descarga y actualización de datos
   ##################################
   ###############
   # Descarga y actualiza los datos internacionales sobre el COVID-19
   ##############
-  output$TextDataGlobalUpdate <- renderText({ paste (download_filesCSVOMS (input, output,session),donwload_scrapingWorldometers(input, output,session),sep='\n') })
- 
-   ###############
+  output$dataGlobalUpdate <- renderText({ paste (download_filesCSVOMS (input, output,session),donwload_scrapingWorldometers(input, output,session),sep='\n') })
+  
+  ###############
   # Descarga y actualiza los datos a Nivel Nacional sobre el COVID-19
   ##############
-   
+  
+  output$dataSPUpdate<- renderText({download_SpdataCC (input, output,session)})
+  
   ###############
   #Descarga las recomendaciones de la OMS sobre el COVID-19
   ###############
@@ -345,7 +534,7 @@ shinyServer(function(input, output,session) {
     
   }) 
   ###########################################################################
- 
+  
   output$plot <- renderPlot({
     if (DEBUG) print(paste0("Entramos en el progreso plot"))
     
@@ -380,7 +569,7 @@ shinyServer(function(input, output,session) {
       # When value=NULL, progress text is displayed, but not a progress bar.
       withProgress(message = 'And this also', detail = "This other thing",
                    style = style, value = NULL, {
-                   Sys.sleep(0.75)
+                     Sys.sleep(0.75)
                    })
       
       # We could also increment the progress indicator like so:
@@ -389,104 +578,8 @@ shinyServer(function(input, output,session) {
       # specific value:
       setProgress(1)
     })
-     
+    
     plot(cars$speed, cars$dist)
   })
   
-
-  
-  # This example uses the Progress object API directly. This is useful because
-  # calls an external function to do the computation.
-  output$table <- DT::renderDataTable({
-    if (DEBUG) print(paste("Dentro de output"))
-    server_table (input, output,session)
-  })
-  output$table1 <- DT::renderDataTable({
-    if (DEBUG) print(paste("Dentro de output"))
-    server_table (input, output,session)
-  })
-  output$table2 <- DT::renderDataTable({
-    if (DEBUG) print(paste("Dentro de output"))
-    server_table (input, output,session)
-  })
-  output$table3 <- DT::renderDataTable({
-    if (DEBUG) print(paste("Dentro de output"))
-    server_table (input, output,session)
-  })
-  output$table4 <- DT::renderDataTable({
-    if (DEBUG) print(paste("Dentro de output"))
-    server_table (input, output,session)
-  })
-  output$table5 <- DT::renderDataTable({
-    if (DEBUG) print(paste("Dentro de output"))
-    server_table (input, output,session)
-  })
-  output$table6 <- DT::renderDataTable({
-    if (DEBUG) print(paste("Dentro de output"))
-    server_table (input, output,session)
-  })
-  #output es una lista que "anota" qué es lo que tiene que mostrar. En este caso
-  # le decimos que tieene que hacer un histograma
-  output$HistPlot <- renderPlot({
-    if (DEBUG) print(paste("Dentro de HistPlot"))
-    # faithful es un dataset que viene precargado en R.
-    datos  <- data.frame(faithful$waiting)
-    # lo que hace es discretizar a los waiting times entre erupción según la cantidad
-    # de bins que el usuario elija. inputs es una lista que "anota" lo que le manda 
-    # el usuario
-    ggplot(datos) +
-      geom_histogram(aes(x=faithful.waiting),fill="#75AADB",bins=input$bins) +
-      labs(title=isolate({input$titulo}),
-           x="Tiempo de espera hasta la próxima erupción (minutos)")
-  })
-  output$HistPlot2 <- renderPlot({
-    if (DEBUG) print(paste("Dentro de HistPlot"))
-    # faithful es un dataset que viene precargado en R.
-    datos  <- data.frame(faithful$waiting)
-    # lo que hace es discretizar a los waiting times entre erupción según la cantidad
-    # de bins que el usuario elija. inputs es una lista que "anota" lo que le manda 
-    # el usuario
-    ggplot(datos) +
-      geom_histogram(aes(x=faithful.waiting),fill="#75AADB",bins=input$bins) +
-      labs(title=isolate({input$titulo}),
-           x="Tiempo de espera hasta la próxima erupción (minutos)")
-  })
-  output$HistPlot3 <- renderPlot({
-    if (DEBUG) print(paste("Dentro de HistPlot"))
-    # faithful es un dataset que viene precargado en R.
-    datos  <- data.frame(faithful$waiting)
-    # lo que hace es discretizar a los waiting times entre erupción según la cantidad
-    # de bins que el usuario elija. inputs es una lista que "anota" lo que le manda 
-    # el usuario
-    ggplot(datos) +
-      geom_histogram(aes(x=faithful.waiting),fill="#75AADB",bins=input$bins) +
-      labs(title=isolate({input$titulo}),
-           x="Tiempo de espera hasta la próxima erupción (minutos)")
-  })
-  output$HistPlot4 <- renderPlot({
-    if (DEBUG) print(paste("Dentro de HistPlot"))
-    # faithful es un dataset que viene precargado en R.
-    datos  <- data.frame(faithful$waiting)
-    # lo que hace es discretizar a los waiting times entre erupción según la cantidad
-    # de bins que el usuario elija. inputs es una lista que "anota" lo que le manda 
-    # el usuario
-    ggplot(datos) +
-      geom_histogram(aes(x=faithful.waiting),fill="#75AADB",bins=input$bins) +
-      labs(title=isolate({input$titulo}),
-           x="Tiempo de espera hasta la próxima erupción (minutos)")
-  })
-  output$DensPlot <- renderPlot({
-    if (DEBUG) print(paste("Dentro de renderplot0"))
-    # faithful es un dataset que viene precargado en R.
-    datos  <- data.frame(faithful$waiting)
-    # lo que hace es discretizar a los waiting times entre erupción según la cantidad
-    # de bins que el usuario elija. inputs es una lista que "anota" lo que le manda 
-    # el usuario
-    ggplot(datos) +
-      geom_density(aes(x=faithful.waiting),fill="#75AADB") +
-      labs(title=isolate({input$titulo}),
-           x="Tiempo de espera hasta la próxima erupción (minutos)")
-  })
-  
-
 })

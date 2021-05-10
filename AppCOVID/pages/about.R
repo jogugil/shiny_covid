@@ -1,4 +1,4 @@
- 
+body_about <- fluidRow (
   tagList(
     tags$title("About the AppCOVID -2020-2021 - Data Visualization Group Mini-Project - GCD. UV"),
     tags$div(
@@ -6,4 +6,7 @@
         includeMarkdown("content/about.md")
     )
   )
- 
+)
+page_about <- fluidPage (
+    body_about
+  )

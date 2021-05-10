@@ -1,0 +1,7 @@
+"World-country-continental","continent","NewCases","TotalDeaths","NewDeaths","TotalRecovered","NewRecovered","ActiveCases","CritcalCase","TotalCase1M","DeathsCase1M","TotalTests","test1Mpop","Population","Continent","Caseevery","Deathevery","Testevery","newCase1M","deathsCase1M","ActiveCas1M"
+"North America","38827603","11614","871328","420","30858830","10943","7097445","16789","","","","","","North America","","",NA,NA,NA,""
+"Asia","43870238","376003","568163","4212","37843925","373646","5458150","33111","","","","","","Asia","","",NA,NA,NA,""
+"South America","25848622","6887","702324","140","23431485","6820","1714813","27674","","","","","","South America","","",NA,NA,NA,""
+"Europe","45482115","54017","1034889","1308","40724644","93261","3722582","26425","","","","","","Europe","","",NA,NA,NA,""
+"Africa","4667527","1398","124538","43","4200180","1443","342809","3308","","","","","","Africa","","",NA,NA,NA,""
+"Oceania","63718","15","1209","","60506","2","2003","3","","","","","","Australia/Oceania","","",NA,NA,NA,""

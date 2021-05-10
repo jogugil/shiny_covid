@@ -1,1 +1,2 @@
-runApp('AppCOVID')
+shiny::runApp('appcovid')
+

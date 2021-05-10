@@ -96,6 +96,26 @@
     {
       "es": "Activos",
       "en": "Active"
+    },
+    {
+      "es": "Datos Nacionales por Comunidades",
+      "en": "Spanish data"
+    },
+    {
+      "es": "Serie Temporal Johns Hopkins",
+      "en": "Johns Hopkins Temporary Series"
+    },
+    {
+      "es": "Incidencia Acumulada (14d) OMS",
+      "en": "Cumulative Incidence (14d) OMS"
+    },
+    {
+      "es": "Situación Actual wldometer",
+      "en": "Current situation worldometer"
+    },
+    {
+      "es": "Se ha actualizado las recomendaciones de la OMS sobre el COVID-19!!.",
+      "en": "The OMS recommendations on COVID-19 have been updated !!."
     }
   ]
 }
