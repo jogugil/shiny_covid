@@ -101,11 +101,10 @@ sidebar <- dashboardSidebar(
 )
 
 body <- dashboardBody(
- 
-    tags$head(
+     tags$head(
         tags$link(rel = "stylesheet", type = "text/css", href = "custom.css"),
         tags$style(".shiny-progress {top: 30% !important;left: 30% !important;margin-top: -100px !important;margin-left: -250px !important; color: blue;font-size: 20px;font-style: italic;}"),
-        tags$head(tags$script(type="text/javascript", src="custom.js"))
+        tags$head(tags$script(type="text/javascript", src="custom.js") )
         ),
       tabItems(
         tabItem(
@@ -148,7 +147,9 @@ body <- dashboardBody(
                 tabName = "recomendacionesOMSUpdate",
                 style="overflow-y: auto;",
                 p(i18n$t("Actualizando los datos de recomendaciones de la OMS!!!!!")),
-                h3(i18n$t(verbatimTextOutput("tabsRecomendaOMS")))
+               
+                 h3( i18n$t(verbatimTextOutput("tabsRecomendaOMS"))) 
+               
         ), 
         #GUIDELINE
         tabItem(

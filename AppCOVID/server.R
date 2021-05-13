@@ -18,7 +18,7 @@ library(htmltools)
 
 
 shinyServer(function(input, output,session) {
-     ##########################
+  ##########################
   # Internacionalización
   #######################
   observeEvent(input$selected_language, {
@@ -34,9 +34,6 @@ shinyServer(function(input, output,session) {
        load_Data (input, output,session)
    })
   output$globalUpdate <- renderText({i18n$t(globalUpdate_var()) })
-  
- 
-  
   
   ###########
   #
@@ -129,6 +126,7 @@ shinyServer(function(input, output,session) {
         group        = "Active (per capita)"
       )
   })
+  
   #################################
   ###
   #Datos principales de seguimiento de la pandemia
@@ -154,9 +152,12 @@ shinyServer(function(input, output,session) {
   output$summaryDT_country <- renderDataTable(
           getSummaryDT(data_atDate(last_date), "Country/Region", selectable = TRUE)
   )
+  
   proxy_summaryDT_country  <- dataTableProxy("summaryDT_country")
+  
   output$summaryDT_state   <- renderDataTable(
     getSummaryDT(data_atDate(last_date), "Province/State", selectable = TRUE))
+  
   proxy_summaryDT_state    <- dataTableProxy("summaryDT_state")
   
   observeEvent(input$timeSlider, {
@@ -192,7 +193,6 @@ shinyServer(function(input, output,session) {
     leafletProxy("global_map") %>%
       setView(lng = location$Long, lat = location$Lat, zoom = 4)
   })
-  
   
   
   key_figures <- reactive({
@@ -268,6 +268,7 @@ shinyServer(function(input, output,session) {
     div("Last updated: ", strftime(changed_date, format = "%d.%m.%Y - %R %Z")),
     width = 12
   )})
+  
   ###############################
   ###
   # GRÁFICO CON PLOTLY LINETIME
@@ -351,7 +352,7 @@ shinyServer(function(input, output,session) {
     })
     
     dataOMS_var <- reactive ({
-      req(input$selectize_acumulate_type)
+      #req(input$selectize_acumulate_type)
       update_dataOMS (input$selectize_acumulate_type)
     }) 
     mapOMS_var <- reactive ({
@@ -515,27 +516,34 @@ shinyServer(function(input, output,session) {
   # Descarga y actualiza los datos internacionales sobre el COVID-19
   ##############
   output$dataGlobalUpdate <- renderText({ paste (download_filesCSVOMS (input, output,session),donwload_scrapingWorldometers(input, output,session),sep='\n') })
-  
+  observeEvent(input$dataGlobalUpdate, {
+    paste (download_filesCSVOMS (input, output,session),donwload_scrapingWorldometers(input, output,session),sep='\n')
+  })
   ###############
   # Descarga y actualiza los datos a Nivel Nacional sobre el COVID-19
   ##############
   
   output$dataSPUpdate<- renderText({download_SpdataCC (input, output,session)})
-  
+  observeEvent(input$dataSPUpdate, {
+    download_SpdataCC (input, output,session)
+  })
   ###############
   #Descarga las recomendaciones de la OMS sobre el COVID-19
   ###############
+ 
+  
   output$tabsRecomendaOMS <- renderText({
     images <- donwload_scrapingOMS (input, output,session)
     l   <- length(images)
     if(l>0) {
-       
+      
       paste0("Se ha actualizado las recomendaciones de la OMS sobre el COVID-19!!.","\n")
-     } else {
+    } else {
       paste0("No existen recomendaiones actualmente sobre el COVID-19."," \n")
     }
-    
   }) 
+ 
+ 
   ###########################################################################
   
   output$plot <- renderPlot({

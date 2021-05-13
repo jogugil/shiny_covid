@@ -122,9 +122,9 @@ palBin <- colorBin (c('#DAF7A6','#FFC300','#FF5233','#C70039','#900C3F','#581845
  
 
 
-mapOMS  <- leaflet(addLabelOMS (layer_world),options=leafletOptions(minZoom=2,maxZoom = 8)) %>%
+mapOMS  <- leaflet(addLabelOMS (layer_world),options=leafletOptions(minZoom=1,maxZoom = 8)) %>%
                     setMaxBounds(-180, -90, 180, 90) %>%
-                    setView(0, 20, zoom = 2) %>%
+                    setView(0, 20, zoom = 1) %>%
                     addTiles() %>%
                     addProviderTiles(providers$CartoDB.Positron, group = "Light") %>%
                     addProviderTiles(providers$HERE.satelliteDay, group = "Satellite") %>%
@@ -162,19 +162,13 @@ color_casecumulative <- function (data) {
                                               data [which(data$ISO3 == cod),"casesCumulative"], 0)
                                         })
   layer_world$casesCumulative <- casesCumulative  %>% unlist()
-  
-   
-  
   palBin <- colorBin (c('#DAF7A6','#FFC300','#FF5233','#C70039','#900C3F','#581845'), bins = 10, domain= layer_world$casesCumulative,na.color='transparent')
-  
   
   # Elaboracion del popup:
  
-  
-  
   mapOMS <- leaflet(addLabelOMS (layer_world)) %>%
                 setMaxBounds(-180, -90, 180, 90) %>%
-                setView(0, 20, zoom = 2) %>%
+                setView(0, 20, zoom = 1) %>%
                 addTiles() %>%
                 addProviderTiles(providers$CartoDB.Positron, group = "Light") %>%
                 addProviderTiles(providers$HERE.satelliteDay, group = "Satellite") %>%
@@ -216,7 +210,7 @@ color_deathsCumulative <- function (data) {
   palBin <- colorBin (c('#DAF7A6','#FFC300','#FF5233','#C70039','#900C3F','#581845'), bins = 10, domain= layer_world$deathsCumulative,na.color='transparent')
   mapOMS  <- leaflet(addLabelOMS (layer_world)) %>%
                         setMaxBounds(-180, -90, 180, 90) %>%
-                        setView(0, 20, zoom = 2) %>%
+                        setView(0, 20, zoom = 1) %>%
                         addTiles() %>%
                         addProviderTiles(providers$CartoDB.Positron, group = "Light") %>%
                         addProviderTiles(providers$HERE.satelliteDay, group = "Satellite") %>%
@@ -257,7 +251,7 @@ color_deathsCumulative <- function (data) {
    palBin <- colorBin (c('#DAF7A6','#FFC300','#FF5233','#C70039','#900C3F','#581845'), bins = 10, domain= layer_world$reported24h,na.color='transparent')
    mapOMS  <- leaflet(addLabelOMS (layer_world)) %>%
                    setMaxBounds(-180, -90, 180, 90) %>%
-                   setView(0, 20, zoom = 2) %>%
+                   setView(0, 20, zoom = 1) %>%
                    addTiles() %>%
                    addProviderTiles(providers$CartoDB.Positron, group = "Light") %>%
                    addProviderTiles(providers$HERE.satelliteDay, group = "Satellite") %>%
@@ -277,9 +271,7 @@ color_deathsCumulative <- function (data) {
                                fillOpacity = 0.5,
                                   fillColor = ~palBin (layer_world$reported24h),   # Color de llenado
                                data= layer_world,
-                               highlightOptions = highlightOptions(color = "white", weight = 2,
-                                                                   bringToFront = TRUE), #highlight cuando pasas el cursor
-                               
+                               highlightOptions = highlightOptions(color = "white", weight = 2,  bringToFront = TRUE), #highlight cuando pasas el cursor
                                labelOptions = labelOptions(direction = "auto") ) %>%
                    addLegend(title = "Cumulative Reports 24h", pal = palBin, values = layer_world$reported24h,
                              position = "bottomright")
@@ -305,8 +297,7 @@ color_deathsCumulative <- function (data) {
    
    
    #### POnemos el nombre de los paises según código ISO3
-   #palBin <- colorBin (c('#DAF7A6','#FFC300','#FF5233','#C70039','#900C3F','#581845'), bins = 4, domain= (layer_world$casesCumulative),na.color='transparent')
-   
+  
    palBin <- colorBin (c('#DAF7A6','#FFC300','#FF5233','#C70039','#900C3F','#581845'), bins = 10, domain= layer_world$casesCumulative,na.color='transparent')
    
    
@@ -314,7 +305,7 @@ color_deathsCumulative <- function (data) {
    
    mapOMS  <- leaflet(addLabelOMS (layer_world)) %>%
                      setMaxBounds(-180, -90, 180, 90) %>%
-                     setView(0, 20, zoom = 2) %>%
+                     setView(0, 20, zoom = 1) %>%
                      addTiles() %>%
                      addProviderTiles(providers$CartoDB.Positron, group = "Light") %>%
                      addProviderTiles(providers$HERE.satelliteDay, group = "Satellite") %>%

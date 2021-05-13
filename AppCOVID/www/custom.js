@@ -1,3 +1,4 @@
+location.reload( forceGet )
 $(document).ready(
   function(){
     if (window.location.hash) {

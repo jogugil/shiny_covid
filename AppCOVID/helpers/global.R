@@ -154,7 +154,7 @@ update_files <- function () {
    
 }
 
-#Compruebo si no están los ficheros, Si no lo estñan los descargo y actualizo cada día
+#Compruebo si no están los ficheros, Si no lo están los descargo y actualizo cada día
     update_files()
 #Ficheros de recomendacion de la OMS
 is_filesRecomOMS ()
