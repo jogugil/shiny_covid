@@ -52,6 +52,10 @@ jhonH_confirmed    <- sprintf("%s/time_series_covid19_confirmed_global.csv",PATH
 jhonH_deceased     <- sprintf("%s/time_series_covid19_deaths_global.csv",PATH_DATA)
 jhonH_recovered    <- sprintf("%s/time_series_covid19_recovered_global.csv",PATH_DATA)
 
+jhonH_confirmed_n     <- sprintf("%s/time_series_covid19_confirmed_global_%s.csv",PATH_DATA,nowdate)
+jhonH_deceased_n      <- sprintf("%s/time_series_covid19_deaths_global_%s.csv",PATH_DATA,nowdate)
+jhonH_recovered_n     <- sprintf("%s/time_series_covid19_recovered_global_%s.csv",PATH_DATA,nowdate)
+
 #Datos de España por comunidad
 spdata_CC     <- sprintf("%s/casos_diagnostico_ccaa_%s.csv",PATH_DATA,nowdate)
 ##############
@@ -61,7 +65,7 @@ spdata_CC     <- sprintf("%s/casos_diagnostico_ccaa_%s.csv",PATH_DATA,nowdate)
 
 #########################
 ##
-# Comprobamos si estan los ficheros de recomendaion 
+# Comprobamos si están los ficheros de recomendación 
 # si no están los descargamos
 #################
 is_filesRecomOMS <- function(){
@@ -69,7 +73,7 @@ is_filesRecomOMS <- function(){
   l   <- length(files)
  
   mytabs <- NULL
-  #Si no estñan los ficheros lso descargamos y kos copiamos en local
+  #Si no están los ficheros los descargamos y los copiamos en local
   if (l<=0) {
     url_recomendationsOMS ='https://www.who.int/es/emergencies/diseases/novel-coronavirus-2019/advice-for-public'
     html <-  url_recomendationsOMS  %>% read_html()  
@@ -111,7 +115,6 @@ update_files <- function () {
   url_world  <- "https://www.worldometers.info/coronavirus/"
   url_sp     <- "https://cnecovid.isciii.es/covid19/resources/casos_diagnostico_ccaa.csv"  
   
-  
   #Descargamos el fichero de la OMS y lo guardamos en local
   filename <- createFilename (path=PATH_DATA,name="globalDataOMS")
   if(!file.exists(filename)) {
@@ -124,11 +127,14 @@ update_files <- function () {
   if(!file.exists(wldometer_World)) {
   
     #Descargamos el fichero de   worldometers con web scraping y guardamos los tres ficheros en local
-    my_table<- url_world %>% read_html() %>% html_table() %>%.[[1]]
-    my_table[]<-lapply(my_table, function(x) (gsub("\\,|\\+", "", (x))))
+    my_table        <- url_world %>% read_html() %>% html_table() %>%.[[1]]
+    
+    my_table[]      <- lapply(my_table, function(x) (gsub("\\,|\\+", "", (x))))
+    
     names(my_table) <- PKI_WD
-    my_table <- my_table %>% dplyr::select(-c(Id))
-    continent <-  my_table[1:6,]
+    my_table        <- my_table %>% dplyr::select(-c(Id))
+    continent       <- my_table[1:6,]
+    
     names(continent)[1] <- 'continent'
     world     <-  my_table[8,]
     names(world)[1] <- 'world'
@@ -141,6 +147,22 @@ update_files <- function () {
     write.csv(world,fworld,row.names = FALSE)
     fcountry <- createFilename (path=PATH_DATA,name="worldometersCountry")
     write.csv(contry,fcountry,row.names = FALSE)
+  }
+  #Comprobamos si existen los ficheros de serie temporal, Sino están en local, los descargamos
+  if(!file.exists(jhonH_confirmed_n)) {
+    url_Confirmed_JH = "https://data.humdata.org/hxlproxy/api/data-preview.csv?url=https%3A%2F%2Fraw.githubusercontent.com%2FCSSEGISandData%2FCOVID-19%2Fmaster%2Fcsse_covid_19_data%2Fcsse_covid_19_time_series%2Ftime_series_covid19_confirmed_global.csv&filename=time_series_covid19_confirmed_global.csv"
+    url_deaths_JH = "https://data.humdata.org/hxlproxy/api/data-preview.csv?url=https%3A%2F%2Fraw.githubusercontent.com%2FCSSEGISandData%2FCOVID-19%2Fmaster%2Fcsse_covid_19_data%2Fcsse_covid_19_time_series%2Ftime_series_covid19_deaths_global.csv&filename=time_series_covid19_deaths_global.csv"
+    url_recovered_JH= "https://data.humdata.org/hxlproxy/api/data-preview.csv?url=https%3A%2F%2Fraw.githubusercontent.com%2FCSSEGISandData%2FCOVID-19%2Fmaster%2Fcsse_covid_19_data%2Fcsse_covid_19_time_series%2Ftime_series_covid19_recovered_global.csv&filename=time_series_covid19_recovered_global.csv"
+          
+    data_file <- read_csv(url_Confirmed_JH)
+    write.csv(data_file,jhonH_confirmed_n,row.names = FALSE )
+    
+    data_file <- read_csv(url_deaths_JH)
+    write.csv(data_file,jhonH_deceased_n,row.names = FALSE)
+    
+    data_file <- read_csv(url_recovered_JH)
+    write.csv(data_file,jhonH_recovered_n,row.names = FALSE)           
+   
   }
   
   #Descargamos datos de  España
@@ -158,15 +180,19 @@ update_files <- function () {
     update_files()
 #Ficheros de recomendacion de la OMS
 is_filesRecomOMS ()
+
 #Ficheros Datos Actualizados COvid-19
+
 global_COvidDataOMS               <- NULL
 global_COvidDataWDMeterWorld      <- NULL
 global_COvidDataWDMeterCountry    <- NULL
 global_COvidDataWDMeterContinent  <- NULL
+
 #Ficheros serie temporal covid-19
 data_confirmed    <- NULL
 data_deceased     <- NULL
 data_recovered    <- NULL
+
 #Ficheros COvid-19 España
 casos_cc          <- NULL
 
@@ -180,10 +206,10 @@ result  <- tryCatch ({
   #datos serie temporales. Los tenemos ya descargados para hacer un poco de todo
   # Si se desean descargar los csv se encuentran:
   #"https://data.humdata.org/hxlproxy/api/data-preview.csv?url=https%3A%2F%2Fraw.githubusercontent.com%2FCSSEGISandData%2FCOVID-19%2Fmaster%2Fcsse_covid_19_data%2Fcsse_covid_19_time_series%2Ftime_series_covid19_confirmed_global.csv&filename=time_series_covid19_confirmed_global.csv"
-  
-  data_confirmed    <- read_csv(jhonH_confirmed)
-  data_deceased     <- read_csv(jhonH_deceased)
-  data_recovered    <- read_csv(jhonH_recovered)
+ 
+  data_confirmed    <- read_csv(jhonH_confirmed_n)
+  data_deceased     <- read_csv(jhonH_deceased_n)
+  data_recovered    <- read_csv(jhonH_recovered_n)
   
   ##Datos España por comunidades
   casos_cc    <- read.csv(spdata_CC)
@@ -240,15 +266,16 @@ update_dataOMS <- function (filterType) {
 # Datos de porporciones por continente de WDMETER.com
 #############
 data_CONTINENTWDMETER  <- global_COvidDataWDMeterContinent %>% dplyr::select (c(continent,TotalCases,TotalDeaths,TotalRecovered,ActiveCases))
-data_CONTINENTWDMETER  <- data_CONTINENTWDMETER %>%  mutate ( prop_cont      =  (TotalCases/sum(TotalCases))*100,
-                                                        prop_deatchs   = (TotalDeaths/sum(TotalDeaths))*100,
-                                                        prop_Recovered = (TotalRecovered/sum(TotalRecovered))*100,
-                                                        prop_Active     = (ActiveCases/sum(ActiveCases))*100
-                                                      )
+data_CONTINENTWDMETER  <- data_CONTINENTWDMETER %>%  
+                                    mutate ( prop_cont       = (TotalCases/sum(TotalCases))*100,
+                                             prop_deatchs    = (TotalDeaths/sum(TotalDeaths))*100,
+                                             prop_Recovered  = (TotalRecovered/sum(TotalRecovered))*100,
+                                             prop_Active     = (ActiveCases/sum(ActiveCases))*100
+                                    )
+
 #Cargamos los datos de serie temporal por país (Obtenemos la evolución del virus por país)
 result  <- tryCatch ({  
-  
-
+ 
     # casos confirmados
     data_confirmed_sub <- data_confirmed %>%
       pivot_longer(names_to = "date", cols = 5:ncol(data_confirmed)) %>%
@@ -466,12 +493,21 @@ load_files <- function () {
     
     if (is.null(global_COvidDataOMS))
       global_COvidDataOMS               <- read.csv(omsGlobal)
+    
     if (is.null(global_COvidDataWDMeterWorld))
       global_COvidDataWDMeterWorld      <- read.csv(wldometer_World)
     if (is.null(global_COvidDataWDMeterCountry))
       global_COvidDataWDMeterCountry    <- read.csv(wldometer_Country)
     if (is.null(global_COvidDataWDMeterContinent))
       global_COvidDataWDMeterContinent  <- read.csv(wldometer_Continent)
+ 
+    if (is.null(data_confirmed))
+        data_confirmed  <- read_csv(jhonH_deceased_n)
+    if (is.null(data_deceased))
+        data_deceased  <- read_csv(jhonH_confirmed_n)
+    if (is.null(data_recovered))
+        data_recovered  <- read_csv(jhonH_recovered_n)
+     
     if(is.null (casos_cc))
       casos_cc <- read.csv (casos_cc)
  
@@ -496,14 +532,16 @@ load_Data <- function (input, output,session) {
       download_filesCSVOMS (input, output,session)
       
     } 
+    if(!file.exists(jhonH_deceased_n) | !file.exists(jhonH_deceased_n) | !file.exists(jhonH_deceased_n)) {
+      download_timelinaData (input, output,session)
+    } 
     if (!file.exists(wldometer_Continent)) {
       donwload_scrapingWorldometers (input, output,session)
     } 
     if (!file.exists(spdata_CC)) {
       download_SpdataCC (input, output,session)
     } 
-  
-      
+    
     return ( "Datos Actualizados")
 }
  
@@ -512,9 +550,37 @@ load_Data <- function (input, output,session) {
 #####################################################################
 #Descargamos los datos y grabamos en el directorio de datos de la APP
 #####################################################################
+
+
+##################
+##Descargamos fichero serie temporal (se actualizará cada vez que arranque la app)
+#################
+
+download_timelinaData <- function (input,output,session) {
+  url_Confirmed_JH = "https://data.humdata.org/hxlproxy/api/data-preview.csv?url=https%3A%2F%2Fraw.githubusercontent.com%2FCSSEGISandData%2FCOVID-19%2Fmaster%2Fcsse_covid_19_data%2Fcsse_covid_19_time_series%2Ftime_series_covid19_confirmed_global.csv&filename=time_series_covid19_confirmed_global.csv"
+  url_deaths_JH = "https://data.humdata.org/hxlproxy/api/data-preview.csv?url=https%3A%2F%2Fraw.githubusercontent.com%2FCSSEGISandData%2FCOVID-19%2Fmaster%2Fcsse_covid_19_data%2Fcsse_covid_19_time_series%2Ftime_series_covid19_deaths_global.csv&filename=time_series_covid19_deaths_global.csv"
+  url_recovered_JH= "https://data.humdata.org/hxlproxy/api/data-preview.csv?url=https%3A%2F%2Fraw.githubusercontent.com%2FCSSEGISandData%2FCOVID-19%2Fmaster%2Fcsse_covid_19_data%2Fcsse_covid_19_time_series%2Ftime_series_covid19_recovered_global.csv&filename=time_series_covid19_recovered_global.csv"
+  
+  #Comprobamos si existen los ficheros de serie temporal, Sino están en local, los descargamos
+  if(!file.exists(jhonH_confirmed_n)) {
+    
+    data_file <- read_csv(url_Confirmed_JH)
+    write.csv(data_file,jhonH_confirmed_n,row.names = FALSE)
+  } 
+  if(!file.exists(jhonH_deceased_n)) {
+    
+    data_file <- read_csv(url_deaths_JH)
+    write.csv(data_file,jhonH_deceased_n,row.names = FALSE)
+  }
+  if(!file.exists(jhonH_deceased_n)) {
+    
+    data_file <- read_csv(url_recovered_JH)
+    write.csv(data_file,jhonH_recovered_n,row.names = FALSE)           
+  } 
+}
 ###############
 #
-# Descargamos Fichero de datos de COVID en España por comunidad  Autonoma
+# Descargamos Fichero de datos de COVID en España por comunidad  Autónoma
 #################
 download_SpdataCC <- function (input,output,session) {
   url <- "https://cnecovid.isciii.es/covid19/resources/casos_diagnostico_ccaa.csv"
