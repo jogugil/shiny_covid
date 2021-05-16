@@ -6,15 +6,14 @@
 #
 #    http://shiny.rstudio.com/
 #
-
- 
-library(scales)
-library(ggplot2)
-library(leaflet)
- 
 library(DT)
 library(rgdal) 
 library(htmltools)
+ 
+library(scales)
+library(leaflet)
+library(ggplot2)
+
 
 
 shinyServer(function(input, output,session) {
@@ -500,7 +499,6 @@ shinyServer(function(input, output,session) {
   
    
   output$tabsBoxRecomendaOMS <- renderUI({
-    is_filesRecomOMS ()
     mytabs <- load_filesRecomOMS ()
     if(!is.null(mytabs)) {
       do.call(tabBox, args = c(width = 1024, mytabs))

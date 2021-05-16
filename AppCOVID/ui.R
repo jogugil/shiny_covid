@@ -16,7 +16,6 @@ library (shiny.i18n)
 library (shinyWidgets)
 library (shinydashboard)
 
-
 directorio <- getwd()
 cat(file=stdout()," Este es el drectorio:",directorio)
 
@@ -27,14 +26,14 @@ source("./helpers/helpers.R" )
 source("./helpers/global.R" )
 source("./pages/map.R" )
  
-
-source("./pages/ui_globalJH.R", local = TRUE)
-source("./pages/ui_globalOMS.R", local = TRUE)
-source("./pages/ui_globalWDMETER.R", local = TRUE)
-source("./pages/ui_sp.R", local = TRUE)
-source("./pages/ui_rec.R", local = TRUE)
-source("./pages/about.R", local = TRUE)
-source("./pages/guideline.R", local = TRUE)
+#Ficheros código Front-End
+source("./pages/ui_globalJH.R", local = TRUE) # Funcionalidad serie Temporal Datos
+source("./pages/ui_globalOMS.R", local = TRUE) #Funcionalidad Incidencia acumulada. Datos OMS
+source("./pages/ui_globalWDMETER.R", local = TRUE) #Funcionalidad, datos totales del día actual. Página web datos WoldMete.com
+source("./pages/ui_sp.R", local = TRUE)  #Funcionalidad Datos nivel nacional por comunidades. Datos Ministerio sanidad
+source("./pages/ui_rec.R", local = TRUE) #Funcionalidad recomendaciones OMS. Página web OMS 
+source("./pages/about.R", local = TRUE)  # Funcionalidad sobre los desabolladores
+source("./pages/guideline.R", local = TRUE) # Funcionalidad sobre la app y la fuente de datos
  
 header <- dashboardHeader(
   title =  "COVID 19. DV.2020-21",

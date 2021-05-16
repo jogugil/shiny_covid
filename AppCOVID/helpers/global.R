@@ -1,19 +1,21 @@
-library(shiny)
-library(shinyWidgets)
-library(ggplot2)
-library(shiny)
-library(shinydashboard)
-library(tidyverse)
+ 
+#Cargamos las librerias necesarias para la app
+library (sf) 
 library(rvest)
-library (sf)
-library(wbstats)
-
 library(leaflet)
+library(ggplot2)
+library(wbstats)
+library (stringr)
+#Se cargan funciones auxiliares hecas en R
 source("./helpers/helpers.R")
 
 DEBUG <- TRUE
-PATH_DATA                 <-"./data"
-PATH__RECOMEN_IMG_OMS     <-"./data/RECOM/OMS"
+PATH_DATA                         <-"./data"
+PATH__RECOMEN_IMG_OMS             <-"./data/RECOM/OMS"
+PATH__RECOMEN_IMG_OMS_BACKUP      <-"./data/RECOM/OMS/old"
+
+URL_RECOMOMS ='https://www.who.int/es/emergencies/diseases/novel-coronavirus-2019/advice-for-public'
+
 STANDBY_TIME    <- 15
 PKI_OMS         <- c("Name","Region","casesCumulative","cumulative100000p","reported7d","reported7d100000p",
                        "reported24h","deathsCumulative","deathsCumulative100000p","deathsreported7d",
@@ -68,43 +70,47 @@ spdata_CC     <- sprintf("%s/casos_diagnostico_ccaa_%s.csv",PATH_DATA,nowdate)
 # Comprobamos si están los ficheros de recomendación 
 # si no están los descargamos
 #################
-is_filesRecomOMS <- function(){
-  files  <-  list.files(path=PATH__RECOMEN_IMG_OMS,pattern='*.png')
-  l   <- length(files)
- 
-  mytabs <- NULL
-  #Si no están los ficheros los descargamos y los copiamos en local
-  if (l<=0) {
-    url_recomendationsOMS ='https://www.who.int/es/emergencies/diseases/novel-coronavirus-2019/advice-for-public'
-    html <-  url_recomendationsOMS  %>% read_html()  
-    #obtenemos sólo los poster resumen de las recomendaciones de la OMS
-    images <- html %>% html_nodes(".lazy") %>% lapply(., function (node) {
-      df <- NULL
-      is_corona <- node %>% html_attr ('data-src')%>%grepl('coronavirus',.) 
-      if(is_corona) {
-        printApp (node %>% html_attr ('alt') )
-        alt  <- node %>% html_attr ('alt')  
-        is_ptr <- alt %>% stringr::str_locate (.,"^COVID-19 :")
-        printApp (is_ptr)
-        label <- alt
-        if(!is.na(is_ptr[[2]]))
-          label <- str_trim(substring(alt,is_ptr[[2]]+1))
-        label <- gsub (" ","_",label)
-        printApp (label)
-        filename <- paste(PATH__RECOMEN_IMG_OMS,str_trim(label),sep='/')
-        filename <- paste(str_trim(filename),'png',sep='.')
-        printApp (filename)
-        href <- paste ("https://www.who.int",node %>% html_attr ('data-image'),sep='/')
-        print(href)
-        df <- data.frame (title =alt,href=href)
-        download.file(href, destfile = filename, mod = "wb")
-        #download.file(href, destfile = "./www", mod = "wb")
-      } 
-      df
-    }) 
-    
-  }
+is_filesRecomOMS <- function(url_recomendationsOMS=PATH__RECOMEN_IMG_OMS){
+
+  #Si existen ficheros los movemos a un directorio de backup
+  move_Files (PATH__RECOMEN_IMG_OMS,PATH__RECOMEN_IMG_OMS_BACKUP )
   
+  html <-  url_recomendationsOMS  %>% read_html(encoding = "utf8")  
+  
+  #obtenemos sólo los poster resumen de las recomendaciones de la OMS
+  images <- html %>% html_nodes(".lazy") %>% lapply(., function (node) {
+    df <- NULL
+    is_corona <- node %>%  html_node(xpath='contains(@data-src,"coronavirus")') 
+    if(is_corona) {
+      printApp (node %>% html_attr ('alt') )
+      #Obtenemos el nombre del fichero de la imagen que tenemos que descargar
+      patern <- "\\/[a-z\\-\\.0-9]*\\.[a-z]*\\?"
+      name <- node %>%html_attr("data-image") %>% str_extract(.,patern) %>% str_sub(.,start = 2,end=str_length(.)-1)
+      
+      label  <- node %>% html_attr ('alt')  
+      is_ptr <- label %>% stringr::str_locate (.,":")
+      if(!is.na(is_ptr[[2]]))
+        label <- str_trim(substring(label,is_ptr[[2]]+1))
+      
+      filename <- paste(PATH__RECOMEN_IMG_OMS,str_trim(name),sep='/')
+      
+      
+      printApp (filename)
+      
+      href <- paste ("https://www.who.int",node %>% html_attr ('data-image'),sep='/')
+      
+      printApp(href)
+      printApp(filename)
+      
+      df <- data.frame (title =label,href=href)
+      download.file(href, destfile = filename, mod = "wb")
+      
+      #download.file(href, destfile = "./www", mod = "wb")
+    } 
+    df
+  }) 
+  images <- images [!sapply(images, is.null)]
+  images
 }
 
 
@@ -177,9 +183,11 @@ update_files <- function () {
 }
 
 #Compruebo si no están los ficheros, Si no lo están los descargo y actualizo cada día
-    update_files()
+
+
+update_files()
 #Ficheros de recomendacion de la OMS
-is_filesRecomOMS ()
+is_filesRecomOMS (URL_RECOMOMS)
 
 #Ficheros Datos Actualizados COvid-19
 
@@ -875,36 +883,7 @@ donwload_scrapingWorldometers <- function (input, output,session) {
 #
 
 donwload_scrapingOMS <- function (input, output,session) {
-  url_recomendationsOMS ='https://www.who.int/es/emergencies/diseases/novel-coronavirus-2019/advice-for-public'
-  html <-  url_recomendationsOMS  %>% read_html()  
-  #obtenemos sólo los poster resumen de las recomendaciones de la OMS
-  images <- html %>% html_nodes(".lazy") %>% lapply(., function (node) {
-                                                        df <- NULL
-                                                        is_corona <- node %>% html_attr ('data-src')%>%grepl('coronavirus',.) 
-                                                        if(is_corona) {
-                                                          printApp (node %>% html_attr ('alt') )
-                                                          alt  <- node %>% html_attr ('alt')  
-                                                          is_ptr <- alt %>% stringr::str_locate (.,"^COVID-19 :")
-                                                          printApp (is_ptr)
-                                                          label <- alt
-                                                          if(!is.na(is_ptr[[2]]))
-                                                            label <- str_trim(substring(alt,is_ptr[[2]]+1))
-                                                          label <- gsub (" ","_",label)
-                                                          printApp (label)
-                                                          filename <- paste(PATH__RECOMEN_IMG_OMS,str_trim(label),sep='/')
-                                                          filename <- paste(str_trim(filename),'png',sep='.')
-                                                          print (filename)
-                                                          href <- paste ("https://www.who.int",node %>% html_attr ('data-image'),sep='/')
-                                                          printApp(href)
-                                                          df <- data.frame (title =alt,href=href)
-                                                          download.file(href, destfile = filename, mod = "wb")
-                                                          #download.file(href, destfile = "./www", mod = "wb")
-                                                        } 
-                                                        df
-                                                      }) 
- 
-  images <- images [!sapply(images, is.null)]
-  images
+  is_filesRecomOMS (URL_RECOMOMS)
 }
 
 ########################################################################
@@ -919,13 +898,13 @@ donwload_scrapingOMS <- function (input, output,session) {
 
 load_filesRecomOMS<- function (input, output,session) {
   patron <- ".\\w*$" #Eliminamos la extensión del fichero (tendría que ser png, aquí no se comprueba)
-  files  <-  list.files(path=PATH__RECOMEN_IMG_OMS,pattern='*.png')
+  files  <-  list.files(path=PATH__RECOMEN_IMG_OMS,pattern='\\.[a-z]*$')
   l   <- length(files)
-  printApp("LOAD_FILES")
-  printApp(l)
-  mytabs <- NULL
-  if (l>0) {
-    #Copiamos al directorio cache (www)  y al directorio data los ficheros png
+  
+  if (l <=0) 
+    is_filesRecomOMS ()
+  
+   #Copiamos al directorio cache (www)  y al directorio data los ficheros png
     lapply(files, function(x) file.copy(paste (PATH__RECOMEN_IMG_OMS, x , sep = "/"),
                                               paste ("www",x, sep = "/"), recursive = FALSE,  copy.mode = TRUE))
     lapply(files, function(x) file.copy(paste (PATH__RECOMEN_IMG_OMS, x , sep = "/"),
@@ -940,6 +919,6 @@ load_filesRecomOMS<- function (input, output,session) {
     if(is.null(mytabs)) {
       mytabs <- tabPanel(title = 'R 0', fluidRow(h3("No existen recomendaciones de la OMS.")))
     }
-  }
+
   mytabs
 }

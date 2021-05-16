@@ -143,3 +143,18 @@ myGauge <- function(id, label, value) {
            tags$meter( id = id, value = value ) 
   ) 
 }
+
+#####################
+# Movemos los ficheros  de un directorio a otro
+######
+
+move_Files <- function (origin_path,dest_path) {
+  files  <-  list.files(path=origin_path, include.dirs = FALSE,all.files = FALSE,pattern = "\\.[a-z]*$")
+  if (length(files) >0) {
+    lapply (files,FUN=function (x) {
+      file.copy(paste (origin_path, x , sep = "/"),
+                paste (dest_path,x, sep = "/"), recursive = FALSE,  copy.mode = TRUE)
+      
+    })
+  }
+}
